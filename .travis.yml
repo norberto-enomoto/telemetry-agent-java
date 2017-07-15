@@ -1,6 +1,6 @@
 language: java
 jdk:
-- oraclejdk8
+  - oraclejdk8
 cache:
   directories:
   - "$HOME/.ivy2/cache"
@@ -11,7 +11,8 @@ before_cache:
 before_install:
 - set -e
 script:
-- bash ./$CODEBASE/scripts/build
+- "bash ./$CODEBASE/scripts/build"
 notifications:
   slack:
-    secure: HuDEFJr2fPFMAzvT6wFaDyW6DLq35jMd6045Y2sWHRE0PkVW+S70C64NfDHvJ0qVj1wG6i5DHTglcy9IsGmBtY4nFyOJdB7fiAIGnxjjLM1FCGSHOs+zys4fM83728fnLJk/OkRCGWUFWc4Wx5t2Ry3w/UVBnlG3PIcZH77ucONzSrVOtToop8eEOeFlvRQsof2e3VLagbKq0C53NVpvQWaCmQ8MsPj2TbVRHlIGr37Aq8KU3XgENYvK1RZRdh5uoem+n8qQAY8ZCjmhj++KHwySXCtunSQ5PbSICY09treQR7vZ7d9N6QBtG0g+RAK8k+AwOZRID2eyNduIix+q6c4soT0GQZSeNSq2SF8Reeko3+KsUNCmibk/2Wzkr+C3v9gMff6lbSwLwo2mf+G/k3hZHTgEtUArQY0tkZ5Ycvw+CgjkfRPOoVLAVdURygMuiZj7BJ0SWqBDF4o1zXGhI+NARQnJavRf8CXFiW6DQ0/n2bk2PBZI2kfIVDRW5Clpujo3kksyVY3heEOQ7Rm5j2Rrf1FR5uII8/h5MoXwUjhaYDZcpYYPrS+6KMtJHEofaDDS5lGcKHdFwfwGD4LmTk48RrWHwzLsR2vtmg4E0DNfcrcuYwjn531Lv6iulYJ/hT1OAFsXgsaUAraJMca0TtaHuBD95fSDszEkCyTiuWk=
+    rooms:
+    - secure: kWVnUDNT3y0APWpo9+oJk0iBn6/kcWKNeMyM4E7QSrJqvGBmsDrmch/pau8tbBzjVlvFGSqHC6pfgdEaTshYeBDDBb02GQJIXGr5Qo31sb+iwq6uOD9HN+aqj2Db8w+sDZUXwwa8T273lF+CArCNmrJriUitPhPHIyiismI86Qehns+3mhyWxp27zFbB6TG59TqUsmMQoezXNjh9gHpPcKt7SK2RPMQS+lEQ3gAnKkZCX2Eq73LOWd4mJY4Gpn0+MINROtQvragwiHg0DWzudx7T33dbEegEyH5a60+KesosDcfsOY8ZvEsmtNq+9biUCfyEgh1TrP0+3n6A/K7LPUiphP+jGxX4/D5lERnBSD4Al9TCmUoqiCVV8gcd2gDclziIL1OK7VZC3NeIdmW6Fou2oZRQ3cX5xHfKtRchZzD5Xiq2rewc0qtC24s24Y/UPP98VjOUp6RF2kMyScPkFZyXD3RG3iNLTxuv5iZZ5OB0dCF06lI59nom1vyLG4XjGs+ocbiFlkafH4wcXoNHFjPZPXK4kPX+1KIcAWjHZWBSWcN0TRm7lu+VJJk1QwK3NSk++bYRS21nPz96zPKj1KPbG/c1vvNy/MZt5s9kymQIo0Ko7i/mPi3FF1ea8sglb/+NyzTWYyEq0vuvRo2xJI22H5RjaHCgkkchePa2H90=

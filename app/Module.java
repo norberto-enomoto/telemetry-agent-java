@@ -2,8 +2,8 @@
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.microsoft.azure.iotsolutions.iothubstreamanalytics.services.runtime.IServicesConfig;
-import com.microsoft.azure.iotsolutions.iothubstreamanalytics.webservice.runtime.IConfig;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.IServicesConfig;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.webservice.runtime.IConfig;
 
 /**
  * This class is a Guice module that tells Guice how to bind several
