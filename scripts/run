@@ -20,7 +20,7 @@ run() {
     check_dependency_java
     ./scripts/env-vars-check
 
-    echo "Starting project name here..."
+    echo "Starting Stream Analytics..."
     chmod +x sbt
     ./sbt "run 9023"
 }
