@@ -10,8 +10,8 @@ libraryDependencies ++= {
     filters,
     guice,
 
-    // https://github.com/Azure/azure-iot-sdk-java/releases
-    "com.microsoft.azure.sdk.iot" % "iot-service-client" % "1.5.22"
+    // https://github.com/Azure/toketi-iothubreact/releases
+    "com.microsoft.azure.iot" %% "iothub-react" % "0.9.0"
   )
 }
 
@@ -69,5 +69,5 @@ maintainer in Docker := "Devis Lucato (https://github.com/dluc)"
 dockerBaseImage := "toketi/openjdk-8-jre-alpine-bash"
 dockerUpdateLatest := true
 dockerBuildOptions ++= Seq("--squash", "--compress", "--label", "Tags=Azure,IoT,PCS,Java")
-// Example params: -Dconfig.file=/opt/conf/prod.conf -Dhttp.port=1234 -Dhttp.address=127.0.0.1
-dockerEntrypoint := Seq("bin/iot-stream-analytics")
+defaultLinuxInstallLocation in Docker := "/app"
+dockerEntrypoint := Seq("./run.sh")

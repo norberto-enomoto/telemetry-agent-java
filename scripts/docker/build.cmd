@@ -12,8 +12,12 @@ docker version > NUL 2>&1
 IF %ERRORLEVEL% NEQ 0 GOTO MISSING_DOCKER
 
 :: Build the container image
-call sbt docker:publishLocal
+call sbt docker:stage
 IF %ERRORLEVEL% NEQ 0 GOTO FAIL
+
+xcopy /EFIKORVXY %APP_HOME%\scripts\docker\content\* target\docker\stage\app\
+cd target\docker\stage
+docker build -t azureiotpcs/iot-stream-analytics-java:latest .
 
 :: - - - - - - - - - - - - - -
 goto :END

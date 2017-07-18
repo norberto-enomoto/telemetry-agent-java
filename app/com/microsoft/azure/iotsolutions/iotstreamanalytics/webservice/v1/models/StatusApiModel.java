@@ -60,19 +60,14 @@ public final class StatusApiModel {
     @JsonProperty("Properties")
     public Dictionary<String, String> getProperties() {
         return new Hashtable<String, String>() {{
-            put("Foo", "Bar");
-            put("Simulation", "on");
-            put("Region", "US");
-            put("DebugMode", "off");
+            //put("Foo", "Bar");
         }};
     }
 
     @JsonProperty("Dependencies")
     public Dictionary<String, String> getDependencies() {
         return new Hashtable<String, String>() {{
-            put("IoTHub", "OK:...msg...");
-            put("Storage", "ERROR:timeout after 3 secs");
-            put("Auth", "ERROR:certificate expired");
+            //put("IoTHub", "OK:...msg...");
         }};
     }
 

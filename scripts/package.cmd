@@ -14,7 +14,7 @@ call ./sbt assembly
 IF %ERRORLEVEL% NEQ 0 GOTO FAIL
 
 echo Package available at:
-dir target/scala-2.12\*assembly*.jar
+dir target\scala-2.12\*assembly*.jar
 
 :: - - - - - - - - - - - - - -
 goto :END

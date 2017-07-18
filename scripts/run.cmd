@@ -1,18 +1,28 @@
 @ECHO off & setlocal enableextensions enabledelayedexpansion
 
 :: Usage:
-:: Run the service in the local environment:  scripts\run
-:: Run the service inside a Docker container: scripts\run -s
-:: Run the service inside a Docker container: scripts\run --in-sandbox
+:: Run the service in the local environment:  .\scripts\run
+:: Run the service inside a Docker container: .\scripts\run -s
+:: Run the service inside a Docker container: .\scripts\run --in-sandbox
+:: Run only the web service:                  .\scripts\run --webservice
+:: Run only the streaming agent:              .\scripts\run --stream
+:: Show how to use this script:               .\scripts\run -h
+:: Show how to use this script:               .\scripts\run --help
 
 :: strlen("\scripts\") => 9
 SET APP_HOME=%~dp0
 SET APP_HOME=%APP_HOME:~0,-9%
 cd %APP_HOME%
 
+IF "%1"=="-h" GOTO :Help
+IF "%1"=="--help" GOTO :Help
 IF "%1"=="-s" GOTO :RunInSandbox
 IF "%1"=="--in-sandbox" GOTO :RunInSandbox
+IF "%1"=="--webservice" GOTO :RunWebService
+IF "%1"=="--stream" GOTO :RunStream
+IF "%1"=="--iothubman" GOTO :RunIoTHubMan
 
+SET STREAM_CLASS=com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.Main
 
 :RunLocally
 
@@ -24,8 +34,46 @@ IF "%1"=="--in-sandbox" GOTO :RunInSandbox
     call .\scripts\env-vars-check.cmd
     IF %ERRORLEVEL% NEQ 0 GOTO FAIL
 
-    :: Run the application
+    :: Run the Play Framework service
+    start "" sbt run
+    IF %ERRORLEVEL% NEQ 0 GOTO FAIL
+
+    :: Run the stream agent
+    start "" sbt "runMain %STREAM_CLASS%"
+    IF %ERRORLEVEL% NEQ 0 GOTO FAIL
+
+    goto :END
+
+
+:RunWebService
+
+    :: Check dependencies
+    java -version > NUL 2>&1
+    IF %ERRORLEVEL% NEQ 0 GOTO MISSING_JAVA
+
+    :: Check settings
+    call .\scripts\env-vars-check.cmd
+    IF %ERRORLEVEL% NEQ 0 GOTO FAIL
+
+    :: Run the Play Framework service
     call sbt run
+    IF %ERRORLEVEL% NEQ 0 GOTO FAIL
+
+    goto :END
+
+
+:RunStream
+
+    :: Check dependencies
+    java -version > NUL 2>&1
+    IF %ERRORLEVEL% NEQ 0 GOTO MISSING_JAVA
+
+    :: Check settings
+    call .\scripts\env-vars-check.cmd
+    IF %ERRORLEVEL% NEQ 0 GOTO FAIL
+
+    :: Run the stream agent
+    call sbt "runMain %STREAM_CLASS%"
     IF %ERRORLEVEL% NEQ 0 GOTO FAIL
 
     goto :END
@@ -55,7 +103,12 @@ IF "%1"=="--in-sandbox" GOTO :RunInSandbox
     docker run -it ^
         -p %PCS_STREAMANALYTICS_WEBSERVICE_PORT%:%PCS_STREAMANALYTICS_WEBSERVICE_PORT% ^
         -e "PCS_STREAMANALYTICS_WEBSERVICE_PORT=%PCS_STREAMANALYTICS_WEBSERVICE_PORT%" ^
-        -e "PCS_IOTHUB_CONN_STRING=%PCS_IOTHUB_CONN_STRING%" ^
+        -e "PCS_IOTHUBREACT_HUB_NAME=%PCS_IOTHUBREACT_HUB_NAME%" ^
+        -e "PCS_IOTHUBREACT_HUB_ENDPOINT=%PCS_IOTHUBREACT_HUB_ENDPOINT%" ^
+        -e "PCS_IOTHUBREACT_HUB_PARTITIONS=%PCS_IOTHUBREACT_HUB_PARTITIONS%" ^
+        -e "PCS_IOTHUBREACT_ACCESS_POLICY=%PCS_IOTHUBREACT_ACCESS_POLICY%" ^
+        -e "PCS_IOTHUBREACT_ACCESS_KEY=%PCS_IOTHUBREACT_ACCESS_KEY%" ^
+        -e "PCS_IOTHUBREACT_ACCESS_HOSTNAME=%PCS_IOTHUBREACT_ACCESS_HOSTNAME%" ^
         -v %PCS_CACHE%\sandbox\.ivy2:/root/.ivy2 ^
         -v %PCS_CACHE%\sandbox\.sbt:/root/.sbt ^
         -v %APP_HOME%:/opt/code ^

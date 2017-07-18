@@ -5,11 +5,16 @@ APP_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && cd .. && pwd )/"
 source "$APP_HOME/scripts/.functions.sh"
 
 sbt_build_docker_image() {
+    check_dependency_java
     check_dependency_docker
 
     cd $APP_HOME
     chmod +x sbt
-    ./sbt docker:publishLocal
+    ./sbt docker:stage
+
+    cp -pR $APP_HOME/scripts/docker/content/* target/docker/stage/app
+    cd target/docker/stage
+    docker build -t azureiotpcs/iot-stream-analytics-java:latest .
 }
 
 sbt_build_docker_image
