@@ -11,9 +11,13 @@ libraryDependencies ++= {
     guice,
 
     // https://github.com/Azure/toketi-iothubreact/releases
-    "com.microsoft.azure.iot" %% "iothub-react" % "0.9.0"
+    "com.microsoft.azure.iot" %% "iothub-react" % "0.10.0-DEV.170721b"
   )
 }
+
+// Temporarily use IoT Hub React snapshots from Bintray
+// https://bintray.com/microsoftazuretoketi/toketi-repo/iothub-react
+resolvers += Resolver.bintrayRepo("microsoftazuretoketi", "toketi-repo")
 
 lazy val commonSettings = Seq(
   version := "0.1-SNAPSHOT",

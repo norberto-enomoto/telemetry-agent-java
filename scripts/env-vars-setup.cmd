@@ -17,12 +17,4 @@ SET PCS_IOTHUBREACT_HUB_ENDPOINT = "..."
 SET PCS_IOTHUBREACT_HUB_PARTITIONS = "..."
 
 :: see: "IoT Hub" ⇒ your hub ⇒ "Shared access policies"
-:: e.g. you should use the predefined "service" policy
-SET PCS_IOTHUBREACT_ACCESS_POLICY = "..."
-
-:: see: Shared access policies ⇒ key name ⇒ Primary key
-SET PCS_IOTHUBREACT_ACCESS_KEY = "..."
-
-:: see: Shared access policies ⇒ key name ⇒ Connection string ⇒ "HostName"
-:: e.g. "my-test-hub..azure-devices.net"
-SET PCS_IOTHUBREACT_ACCESS_HOSTNAME = "..."
+SET PCS_IOTHUBREACT_ACCESS_CONNSTRING = "..."

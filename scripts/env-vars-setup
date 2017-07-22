@@ -25,12 +25,4 @@ export PCS_IOTHUBREACT_HUB_ENDPOINT="..."
 export PCS_IOTHUBREACT_HUB_PARTITIONS="..."
 
 # see: "IoT Hub" ⇒ your hub ⇒ "Shared access policies"
-# e.g. you should use the predefined "service" policy
-export PCS_IOTHUBREACT_ACCESS_POLICY="..."
-
-# see: Shared access policies ⇒ key name ⇒ Primary key
-export PCS_IOTHUBREACT_ACCESS_KEY="..."
-
-# see: Shared access policies ⇒ key name ⇒ Connection string ⇒ "HostName"
-# e.g. "my-test-hub..azure-devices.net"
-export PCS_IOTHUBREACT_ACCESS_HOSTNAME="..."
+export PCS_IOTHUBREACT_ACCESS_CONNSTRING="..."

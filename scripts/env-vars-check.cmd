@@ -20,18 +20,8 @@ IF "%PCS_IOTHUBREACT_HUB_PARTITIONS%" == "" (
     exit /B 1
 )
 
-IF "%PCS_IOTHUBREACT_ACCESS_POLICY%" == "" (
-    echo Error: the PCS_IOTHUBREACT_ACCESS_POLICY environment variable is not defined.
-    exit /B 1
-)
-
-IF "%PCS_IOTHUBREACT_ACCESS_KEY%" == "" (
-    echo Error: the PCS_IOTHUBREACT_ACCESS_KEY environment variable is not defined.
-    exit /B 1
-)
-
-IF "%PCS_IOTHUBREACT_ACCESS_HOSTNAME%" == "" (
-    echo Error: the PCS_IOTHUBREACT_ACCESS_HOSTNAME environment variable is not defined.
+IF "%PCS_IOTHUBREACT_ACCESS_CONNSTRING%" == "" (
+    echo Error: the PCS_IOTHUBREACT_ACCESS_CONNSTRING environment variable is not defined.
     exit /B 1
 )
 

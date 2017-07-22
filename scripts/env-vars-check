@@ -20,17 +20,7 @@ if [[ -z "$PCS_IOTHUBREACT_HUB_PARTITIONS" ]]; then
     exit -1
 fi
 
-if [[ -z "$PCS_IOTHUBREACT_ACCESS_POLICY" ]]; then
-    echo "Error: the PCS_IOTHUBREACT_ACCESS_POLICY environment variable is not defined."
-    exit -1
-fi
-
-if [[ -z "$PCS_IOTHUBREACT_ACCESS_KEY" ]]; then
-    echo "Error: the PCS_IOTHUBREACT_ACCESS_KEY environment variable is not defined."
-    exit -1
-fi
-
-if [[ -z "$PCS_IOTHUBREACT_ACCESS_HOSTNAME" ]]; then
-    echo "Error: the PCS_IOTHUBREACT_ACCESS_HOSTNAME environment variable is not defined."
+if [[ -z "$PCS_IOTHUBREACT_ACCESS_CONNSTRING" ]]; then
+    echo "Error: the PCS_IOTHUBREACT_ACCESS_CONNSTRING environment variable is not defined."
     exit -1
 fi
