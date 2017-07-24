@@ -1,7 +1,41 @@
-* [Build, Run locally and with Docker](#build-run-locally-and-with-docker)
-* [Service configuration](#configuration)
+* [Service configuration](#configuration-and-environment-variables)
+* [Run and Debug with IntelliJ](#run-and-debug-with-intellij)
+* [Run and Debug with Eclipse](#run-and-debug-with-eclipse)
+* [Build & Run from the command line](#build--run-from-the-command-line)
+* [Package the application to a Docker image](#package-the-application-to-a-docker-image)
 * [Azure IoT Hub setup](#azure-iot-hub-setup)
 * [Development setup](#development-setup)
+
+Configuration and Environment variables
+=======================================
+
+The service configuration is stored using Akka's
+[HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md)
+format in [application.conf](conf/application.conf).
+
+The HOCON format is a human readable format, very close to JSON, with some
+useful features:
+
+* Ability to write comments
+* Support for substitutions, e.g. referencing environment variables
+* Supports JSON notation
+
+The configuration file in the repository references some environment
+variables that need to created at least once. Depending on your OS and
+the IDE, there are several ways to manage environment variables:
+
+* For Windows users, the [env-vars-setup.cmd](scripts/env-vars-setup.cmd)
+  script needs to be prepared and executed just once. When executed, the
+  settings will persist across terminal sessions and reboots.
+* For Linux and OSX environments, the [env-vars-setup](scripts/env-vars-setup)
+  script needs to be executed every time a new console is opened.
+  Depending on the OS and terminal, there are ways to persist values
+  globally, for more information these pages should help:
+  * https://stackoverflow.com/questions/13046624/how-to-permanently-export-a-variable-in-linux
+  * https://stackoverflow.com/questions/135688/setting-environment-variables-in-os-x
+  * https://help.ubuntu.com/community/EnvironmentVariables
+* IntelliJ IDEA: env. vars can be set in each Run Configuration, see
+  https://www.jetbrains.com/help/idea/run-debug-configuration-application.html
 
 Run and Debug with IntelliJ
 ===========================
@@ -110,20 +144,6 @@ dockerEntrypoint := Seq("bin/iot-stream-analytics")
 The package logic is executed via
 [sbt-native-packager](https://github.com/sbt/sbt-native-packager), installed
 in [plugins.sbt](project/plugins.sbt).
-
-Configuration
-=============
-
-The service configuration is stored using Akka's
-[HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md)
-format in [application.conf](conf/application.conf).
-
-The HOCON format is a human readable format, very close to JSON, with some
-useful features:
-
-* Ability to write comments
-* Support for substitutions, e.g. referencing environment variables
-* Supports JSON notation
 
 Azure IoT Hub setup
 ===================
