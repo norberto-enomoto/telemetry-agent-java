@@ -148,8 +148,8 @@ in [plugins.sbt](project/plugins.sbt).
 Azure IoT Hub setup
 ===================
 
-At some point you will probably want to setup your Azure IoT Hub, for
-development and integration tests.
+To use IoT Stream Analytics you will need to setup your Azure IoT Hub,
+for development and integration tests.
 
 The project includes some Bash scripts to help you with this setup:
 

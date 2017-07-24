@@ -10,6 +10,7 @@ libraryDependencies ++= {
     filters,
     guice,
 
+    // TODO: use official release
     // https://github.com/Azure/toketi-iothubreact/releases
     "com.microsoft.azure.iot" %% "iothub-react" % "0.10.0-DEV.170721b"
   )
