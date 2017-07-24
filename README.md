@@ -29,7 +29,7 @@ After cloning the repository, follow these steps:
    script.  The service internally uses [IoT Hub React](https://github.com/Azure/toketi-iothubreact) so you will notice some
    variables with an "IOTHUBREACT" prefix. For more information about
    environment variables, see the
-   [development notes][DEVELOPMENT.md#configuration-and-environment-variables].
+   [development notes](DEVELOPMENT.md#configuration-and-environment-variables).
 1. Open a terminal console into the project folder, and run these command to start
    the [IoT Hub Manager](https://github.com/Azure/iothub-manager-dotnet)
    and the Simulation services:
