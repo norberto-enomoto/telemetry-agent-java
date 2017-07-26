@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.IServicesConfig;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.runtime.IConfig;
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -18,5 +21,10 @@ public class Module extends AbstractModule {
     public void configure() {
         // Note: this method should be empty
         // Try to use use JIT binding and @ImplementedBy instead
+    }
+
+    @Provides
+    IServicesConfig provideIServicesConfig(IConfig config) {
+        return config.getServicesConfig();
     }
 }

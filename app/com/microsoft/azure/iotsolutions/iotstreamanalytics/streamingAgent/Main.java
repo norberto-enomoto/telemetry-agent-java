@@ -2,78 +2,46 @@
 
 package com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent;
 
-import akka.Done;
-import akka.NotUsed;
-import akka.stream.javadsl.*;
-import com.microsoft.azure.iot.iothubreact.MessageFromDevice;
-import com.microsoft.azure.iot.iothubreact.SourceOptions;
-import com.microsoft.azure.iot.iothubreact.javadsl.IoTHub;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.exceptions.ConfigurationException;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.runtime.Uptime;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.streaming.Stream;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import play.Logger;
 
-import java.time.Instant;
-import java.util.concurrent.CompletionStage;
+import java.io.IOException;
 
-import static java.lang.System.out;
+public class Main {
+    private static final Logger.ALogger log = Logger.of(Main.class);
 
-public class Main extends AkkaApp {
+    static Injector injector = Guice.createInjector(new Module());
 
-    // In case the position is missing in the storage, start streaming data
-    // from no more than 10 days in the past
-    static final int StartFrom = 10 * 86400;
-
-    public static void main(String[] args) throws ConfigurationException {
-
+    public static void main(String[] args) throws ConfigurationException, IOException {
         checkConfiguration();
+        printBootstrapInfo();
 
-        IoTHub hub = new IoTHub();
-        SourceOptions options = new SourceOptions()
-            .fromCheckpoint(Instant.now().minusSeconds(StartFrom));
-
-        // TODO: change CP type
-        String cpType="outofband";
-
-        if (cpType == "outofband") {
-            options.checkpointOnPull();
-            Source<MessageFromDevice, NotUsed> messages = hub.source(options);
-            ProcessAndCheckpointOutOfBand(messages);
-        } else {
-            Sink<MessageFromDevice, CompletionStage<Done>> sink = hub.checkpointSink();
-            Source<MessageFromDevice, NotUsed> messages = hub.source(options);
-            ProcessAndCheckpointAfterProcessing(messages, sink);
-        }
+        injector.getInstance(Stream.class).Run();
     }
 
-    private static void ProcessAndCheckpointOutOfBand(
-        Source<MessageFromDevice, NotUsed> messages) {
-        messages
-            .to(consoleSink())
-            .run(streamMaterializer);
-    }
+    private static void printBootstrapInfo() {
+        Config conf = ConfigFactory.load();
 
-    // TODO: fix, the stream is not working
-    private static void ProcessAndCheckpointAfterProcessing(
-        Source<MessageFromDevice, NotUsed> messages,
-        Sink<MessageFromDevice, CompletionStage<Done>> sink) {
-        messages
-            .via(consoleFlow())
-            .to(sink)
-            .run(streamMaterializer);
-    }
+        String hubName = conf.getString("iothub-react.connection.hubName");
+        String hubEndpoint = conf.getString("iothub-react.connection.hubEndpoint");
+        String hubPartitions = conf.getString("iothub-react.connection.hubPartitions");
+        String cpBackendType = conf.getString("iothub-react.checkpointing.storage.backendType");
+        String cpNamespace = conf.getString("iothub-react.checkpointing.storage.namespace");
+        String cpFrequency = conf.getString("iothub-react.checkpointing.frequency");
 
-    private static Flow<MessageFromDevice, MessageFromDevice, NotUsed> consoleFlow() {
-        return Flow.of(MessageFromDevice.class).map(m -> process(m));
-    }
-
-    private static Sink<MessageFromDevice, CompletionStage<Done>> consoleSink() {
-        return Sink.foreach(m -> process(m));
-    }
-
-    // Temporary code, print events to console
-    private static MessageFromDevice process(MessageFromDevice m) {
-        out.println("Device: " + m.deviceId() + ": Schema: " + m.messageSchema() + ": Content: " + m.contentAsString());
-        return m;
+        log.info("Streaming agent started, ProcessId {}", Uptime.getProcessId());
+        log.info("IoT Hub name: {}", hubName);
+        log.info("IoT Hub endpoint: {}", hubEndpoint);
+        log.info("IoT Hub partitions: {}", hubPartitions);
+        log.info("Checkpointing storage: {}", cpBackendType);
+        log.info("Checkpointing namespace: {}", cpNamespace);
+        log.info("Checkpointing min frequency: {}", cpFrequency);
     }
 
     private static void checkConfiguration() throws ConfigurationException {
@@ -84,7 +52,6 @@ public class Main extends AkkaApp {
         String hubPartitions = conf.getString("iothub-react.connection.hubPartitions");
         String cpBackendType = conf.getString("iothub-react.checkpointing.storage.backendType");
         String cpNamespace = conf.getString("iothub-react.checkpointing.storage.namespace");
-        String cpFrequency = conf.getString("iothub-react.checkpointing.frequency");
 
         if (hubName.isEmpty()) {
             throw new ConfigurationException("Azure IoT Hub name not found in the configuration.");
@@ -108,12 +75,5 @@ public class Main extends AkkaApp {
                 throw new ConfigurationException("CosmosDb connection string not found in the configuration.");
             }
         }
-
-        out.println("IoT Hub name: " + hubName);
-        out.println("IoT Hub endpoint: " + hubEndpoint);
-        out.println("IoT Hub partitions: " + hubPartitions);
-        out.println("Checkpointing storage: " + cpBackendType);
-        out.println("Checkpointing namespace: " + cpNamespace);
-        out.println("Checkpointing min frequency: " + cpFrequency);
     }
 }

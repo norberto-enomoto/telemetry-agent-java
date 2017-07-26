@@ -51,11 +51,12 @@ After cloning the repository, follow these steps:
 1. Open the solution in IntelliJ IDEA
 1. Either in IntelliJ Run Configuration or in your system, define the following
    environment variables:
+    1. `PCS_STREAMANALYTICS_WEBSERVICE_PORT` = 9023
+    1. `PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING` = {your CosmosDb DocumentDb connection string}
     1. `PCS_IOTHUBREACT_HUB_NAME` = {your Azure IoT Hub - Event Hub compatible name}
     1. `PCS_IOTHUBREACT_HUB_ENDPOINT` = {your Azure IoT Hub endpoint}
     1. `PCS_IOTHUBREACT_HUB_PARTITIONS` = {your Azure IoT Hub partition count}
     1. `PCS_IOTHUBREACT_ACCESS_CONNSTRING` = {your Azure IoT Hub access connection string}
-    1. `PCS_STREAMANALYTICS_WEBSERVICE_PORT` = 9023
 
    For more information about environment variables, see the
    [development notes](DEVELOPMENT.md#configuration-and-environment-variables).

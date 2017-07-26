@@ -5,6 +5,8 @@ APP_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && cd .. && pwd )/"
 source "$APP_HOME/scripts/.functions.sh"
 
 check_dependency_docker
-docker publish azureiotpcs/iot-stream-analytics-java
+
+# Publish the container image do Docker Hub
+docker push azureiotpcs/iot-stream-analytics-java
 
 set +e

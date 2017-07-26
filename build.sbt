@@ -12,7 +12,10 @@ libraryDependencies ++= {
 
     // TODO: use official release
     // https://github.com/Azure/toketi-iothubreact/releases
-    "com.microsoft.azure.iot" %% "iothub-react" % "0.10.0-DEV.170721b"
+    "com.microsoft.azure.iot" %% "iothub-react" % "0.10.0-DEV.170725c",
+
+    // https://github.com/Azure/azure-documentdb-java/releases
+    "com.microsoft.azure" % "azure-documentdb" % "1.12.0"
   )
 }
 

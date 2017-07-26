@@ -4,6 +4,9 @@
 :: See https://github.com/Azure/azure-iot-pcs-team/wiki/Architecture-draft
 SETX PCS_STREAMANALYTICS_WEBSERVICE_PORT "9023"
 
+:: Connection string of the DocumentDb instance where telemetry is stored
+SETX PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING "..."
+
 :: see: Endpoints ⇒ Messaging ⇒ Events ⇒ "Event Hub-compatible name"
 :: e.g. "my-test-hub"
 SETX PCS_IOTHUBREACT_HUB_NAME "..."

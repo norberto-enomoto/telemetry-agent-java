@@ -9,8 +9,8 @@ cd %APP_HOME%
 docker version > NUL 2>&1
 IF %ERRORLEVEL% NEQ 0 GOTO MISSING_DOCKER
 
-:: Build the container image
-docker publish azureiotpcs/iot-stream-analytics-java
+:: Publish the container image do Docker Hub
+docker push azureiotpcs/iot-stream-analytics-java
 IF %ERRORLEVEL% NEQ 0 GOTO FAIL
 
 :: - - - - - - - - - - - - - -
