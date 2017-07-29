@@ -16,10 +16,10 @@ public class ServicesConfig implements IServicesConfig {
     }
 
     public StorageConfig getMessagesStorageConfig() {
-        return messagesConfig;
+        return this.messagesConfig;
     }
 
     public StorageConfig getAlarmsStorageConfig() {
-        return alarmsConfig;
+        return this.alarmsConfig;
     }
 }
