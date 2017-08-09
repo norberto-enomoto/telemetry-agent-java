@@ -134,8 +134,9 @@ public class Messages implements IMessages {
             DocumentCollection info = new DocumentCollection();
             info.setId(this.docDbCollection);
 
-            IndexingPolicy indexing = new IndexingPolicy();
-            indexing.setIndexingMode(IndexingMode.Lazy);
+            RangeIndex index = Index.Range(DataType.String, -1);
+            IndexingPolicy indexing = new IndexingPolicy(new Index[]{index});
+            indexing.setIndexingMode(IndexingMode.Consistent);
             //indexing.setIncludedPaths(new ArrayList<IncludedPath>() {{
             //    add(new IncludedPath("/device/id"));
             //    add(new IncludedPath("/doc/schema"));
@@ -155,7 +156,15 @@ public class Messages implements IMessages {
             String databaseLink = String.format("/dbs/%s", this.docDbDatabase);
 
             this.docDbConnection.createCollection(databaseLink, info, this.docDbOptions);
-        } catch (Exception e) {
+        } catch (DocumentClientException e) {
+            if (e.getStatusCode() != 409) {
+                log.error("Error while getting DocumentDb collection", e);
+                throw e;
+            }
+
+            log.warn("Another process already created the collection", e);
+        }
+        catch (Exception e) {
             log.error("Error while creating DocumentDb collection", e);
             throw e;
         }
