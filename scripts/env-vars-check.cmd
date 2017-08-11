@@ -10,6 +10,16 @@ IF "%PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING%" == "" (
     exit /B 1
 )
 
+IF "%PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT%" == "" (
+    echo Error: the PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT environment variable is not defined.
+    exit /B 1
+)
+
+IF "%PCS_IOTHUBREACT_AZUREBLOB_KEY%" == "" (
+    echo Error: the PCS_IOTHUBREACT_AZUREBLOB_KEY environment variable is not defined.
+    exit /B 1
+)
+
 IF "%PCS_IOTHUBREACT_HUB_NAME%" == "" (
     echo Error: the PCS_IOTHUBREACT_HUB_NAME environment variable is not defined.
     exit /B 1

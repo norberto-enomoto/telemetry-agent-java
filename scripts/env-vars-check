@@ -10,6 +10,16 @@ if [[ -z "$PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING" ]]; then
     exit -1
 fi
 
+if [[ -z "$PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT" ]]; then
+    echo "Error: the PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT environment variable is not defined."
+    exit -1
+fi
+
+if [[ -z "$PCS_IOTHUBREACT_AZUREBLOB_KEY" ]]; then
+    echo "Error: the PCS_IOTHUBREACT_AZUREBLOB_KEY environment variable is not defined."
+    exit -1
+fi
+
 if [[ -z "$PCS_IOTHUBREACT_HUB_NAME" ]]; then
     echo "Error: the PCS_IOTHUBREACT_HUB_NAME environment variable is not defined."
     exit -1

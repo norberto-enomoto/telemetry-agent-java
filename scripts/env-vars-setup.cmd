@@ -7,12 +7,16 @@ SETX PCS_STREAMANALYTICS_WEBSERVICE_PORT "9023"
 :: Connection string of the DocumentDb instance where telemetry is stored
 SETX PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING "..."
 
+:: Connection details of the Azure Blob where checkpoints are stored
+SETX PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT "..."
+SETX PCS_IOTHUBREACT_AZUREBLOB_KEY "..."
+
 :: see: Endpoints ⇒ Messaging ⇒ Events ⇒ "Event Hub-compatible name"
 :: e.g. "my-test-hub"
 SETX PCS_IOTHUBREACT_HUB_NAME "..."
 
 :: see: Endpoints ⇒ Messaging ⇒ Events ⇒ "Event Hub-compatible endpoint"
-v e.g. "iothub-ns-my-test-185521-d1bf252916.servicebus.windows.net"
+:: e.g. "iothub-ns-my-test-185521-d1bf252916.servicebus.windows.net"
 SETX PCS_IOTHUBREACT_HUB_ENDPOINT "..."
 
 :: see: Endpoints ⇒ Messaging ⇒ Events ⇒ Partitions

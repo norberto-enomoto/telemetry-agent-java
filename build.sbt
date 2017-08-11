@@ -24,7 +24,7 @@ libraryDependencies ++= {
 resolvers += Resolver.bintrayRepo("microsoftazuretoketi", "toketi-repo")
 
 lazy val commonSettings = Seq(
-  version := "0.2-SNAPSHOT",
+  version := "0.2.1",
 
   organizationName := "Microsoft Azure",
   organizationHomepage := Some(new URL("https://www.microsoft.com/internet-of-things/azure-iot-suite")),

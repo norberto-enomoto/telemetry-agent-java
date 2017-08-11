@@ -15,6 +15,10 @@ export PCS_STREAMANALYTICS_WEBSERVICE_PORT="9023"
 # Connection string of the DocumentDb instance where telemetry is stored
 export PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING="..."
 
+# Connection details of the Azure Blob where checkpoints are stored
+export PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT="..."
+export PCS_IOTHUBREACT_AZUREBLOB_KEY="..."
+
 # see: Endpoints ⇒ Messaging ⇒ Events ⇒ "Event Hub-compatible name"
 # e.g. "my-test-hub"
 export PCS_IOTHUBREACT_HUB_NAME="..."
