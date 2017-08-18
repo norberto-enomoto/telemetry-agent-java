@@ -1,12 +1,12 @@
 @ECHO off & setlocal enableextensions enabledelayedexpansion
 
-IF "%PCS_STREAMANALYTICS_WEBSERVICE_PORT%" == "" (
-    echo Error: the PCS_STREAMANALYTICS_WEBSERVICE_PORT environment variable is not defined.
+IF "%PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING%" == "" (
+    echo Error: the PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING environment variable is not defined.
     exit /B 1
 )
 
-IF "%PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING%" == "" (
-    echo Error: the PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING environment variable is not defined.
+IF "%PCS_DEVICETELEMETRY_WEBSERVICE_URL%" == "" (
+    echo Error: the PCS_DEVICETELEMETRY_WEBSERVICE_URL environment variable is not defined.
     exit /B 1
 )
 

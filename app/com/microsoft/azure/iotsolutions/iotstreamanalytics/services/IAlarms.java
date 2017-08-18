@@ -3,9 +3,9 @@
 package com.microsoft.azure.iotsolutions.iotstreamanalytics.services;
 
 import com.google.inject.ImplementedBy;
-import com.microsoft.azure.iot.iothubreact.MessageFromDevice;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.RawMessage;
 
 @ImplementedBy(Alarms.class)
 public interface IAlarms {
-    void process(MessageFromDevice m);
+    void process(RawMessage message);
 }

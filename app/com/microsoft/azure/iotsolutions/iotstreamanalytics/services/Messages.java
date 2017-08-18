@@ -5,6 +5,7 @@ package com.microsoft.azure.iotsolutions.iotstreamanalytics.services;
 import com.google.inject.Inject;
 import com.microsoft.azure.documentdb.*;
 import com.microsoft.azure.iot.iothubreact.MessageFromDevice;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.RawMessage;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.IServicesConfig;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.StorageConfig;
 import play.Logger;
@@ -55,13 +56,18 @@ public class Messages implements IMessages {
 
     @Override
     public void process(MessageFromDevice m) {
-        this.alarms.process(m);
-        this.saveMessage(m);
+
+        log.debug("Saving message...");
+        RawMessage msg = this.saveMessage(m);
+
+        log.debug("Analyzing message...");
+        this.alarms.process(msg);
     }
 
-    private void saveMessage(MessageFromDevice m) {
+    private RawMessage saveMessage(MessageFromDevice m) {
 
-        Document doc = this.messageParser.messageToDocument(m);
+        RawMessage message = this.messageParser.messageToRawMessage(m);
+        Document doc = message.toDocument();
 
         String collectionLink = String.format("/dbs/%s/colls/%s",
             this.docDbDatabase, this.docDbCollection);
@@ -73,6 +79,8 @@ public class Messages implements IMessages {
                 // TODO: fix, message gets lost otherwise
             }
         }
+
+        return message;
     }
 
     private void createDatabaseIfNotExists()

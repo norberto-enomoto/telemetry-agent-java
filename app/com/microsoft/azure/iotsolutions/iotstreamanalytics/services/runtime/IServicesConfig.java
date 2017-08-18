@@ -7,6 +7,8 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(ServicesConfig.class)
 public interface IServicesConfig {
 
+    String getMonitoringRulesUrl();
+
     StorageConfig getAlarmsStorageConfig();
 
     StorageConfig getMessagesStorageConfig();

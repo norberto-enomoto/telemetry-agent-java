@@ -51,8 +51,8 @@ After cloning the repository, follow these steps:
 1. Open the solution in IntelliJ IDEA
 1. Either in IntelliJ Run Configuration or in your system, define the following
    environment variables:
-    1. `PCS_STREAMANALYTICS_WEBSERVICE_PORT` = 9023
     1. `PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING` = {your CosmosDb DocumentDb connection string}
+    1. `PCS_DEVICETELEMETRY_WEBSERVICE_URL` = {the Device Telemetry service endpoint}
     1. `PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT` = {your Azure Blob Storage account name}
     1. `PCS_IOTHUBREACT_AZUREBLOB_KEY` = {your Azure Blob Storage account key}
     1. `PCS_IOTHUBREACT_HUB_NAME` = {your Azure IoT Hub - Event Hub compatible name}

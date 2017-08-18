@@ -7,6 +7,9 @@ source "$APP_HOME/scripts/.functions.sh"
 # Whether to update the "latest" tag of the Docker image
 BUILD_LATEST="no"
 
+cd $APP_HOME
+APP_VERSION=$(cat build.sbt|tr -d ' ",'|grep ^version|cut -d'=' -f 2)
+
 confirm_version() {
     echo "Building version $APP_VERSION"
     read -r -p "Do you want to update the 'latest' version too? [y/N] " response
@@ -24,15 +27,18 @@ sbt_build_docker_image() {
 
     cd $APP_HOME
     chmod +x sbt
+
     ./sbt docker:stage
 
     cp -pR $APP_HOME/scripts/docker/content/* target/docker/stage/app
     cd target/docker/stage
 
     if [[ $BUILD_LATEST == "no" ]]; then
-        docker build .
+        docker build . -t azureiotpcs/iot-stream-analytics-java:$APP_VERSION
     else
         docker build -t azureiotpcs/iot-stream-analytics-java:latest .
+        IMGID=$(docker images|grep 'azureiotpcs/iot-stream-analytics-java'|grep latest|tr -s ' '|cut -d' ' -f 3)
+        docker tag $IMGID azureiotpcs/iot-stream-analytics-java:$APP_VERSION
     fi
 }
 

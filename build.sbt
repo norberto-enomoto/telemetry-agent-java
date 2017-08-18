@@ -9,12 +9,13 @@ libraryDependencies ++= {
   Seq(
     filters,
     guice,
+    ws,
 
     // TODO: use official release
     // https://github.com/Azure/toketi-iothubreact/releases
     "com.microsoft.azure.iot" %% "iothub-react" % "0.10.0-DEV.170725c",
 
-    // https://github.com/Azure/azure-documentdb-java/releases
+    // http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22azure-documentdb%22
     "com.microsoft.azure" % "azure-documentdb" % "1.12.0"
   )
 }
@@ -24,7 +25,7 @@ libraryDependencies ++= {
 resolvers += Resolver.bintrayRepo("microsoftazuretoketi", "toketi-repo")
 
 lazy val commonSettings = Seq(
-  version := "0.2.1",
+  version := "0.2.2",
 
   organizationName := "Microsoft Azure",
   organizationHomepage := Some(new URL("https://www.microsoft.com/internet-of-things/azure-iot-suite")),
@@ -39,7 +40,7 @@ lazy val commonSettings = Seq(
   },
 
   // Publishing options, see http://www.scala-sbt.org/0.13/docs/Artifacts.html
-  licenses += ("MIT", url("https://github.com/Azure/pcs-template-microservice-java/blob/master/LICENSE")),
+  licenses += ("MIT", url("https://github.com/Azure/iot-stream-analytics-java/blob/master/LICENSE")),
   publishMavenStyle := true,
   publishArtifact in Test := true,
   publishArtifact in(Compile, packageDoc) := true,

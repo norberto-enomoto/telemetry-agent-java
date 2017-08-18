@@ -13,6 +13,8 @@ public class Config implements IConfig {
     // Settings about this application
     private final String ApplicationKey = Namespace + "iot-stream-analytics.";
 
+    private final String monitoringRulesUrlKey = ApplicationKey + "monitoringRulesUrl";
+
     private final String messagesStorageTypeKey = ApplicationKey + "messages.storageType";
     private final String messagesDocDbConnStringKey = ApplicationKey + "messages.documentDb.connString";
     private final String messagesDocDbDatabaseKey = ApplicationKey + "messages.documentDb.database";
@@ -54,7 +56,10 @@ public class Config implements IConfig {
             data.getString(alarmsDocDbCollectionKey),
             data.getInt(alarmsDocDbRUsKey));
 
-        this.servicesConfig = new ServicesConfig(messagesConfig, alarmsConfig);
+        this.servicesConfig = new ServicesConfig(
+            data.getString(monitoringRulesUrlKey),
+            messagesConfig,
+            alarmsConfig);
 
         return this.servicesConfig;
     }

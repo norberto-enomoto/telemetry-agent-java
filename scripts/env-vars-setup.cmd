@@ -1,11 +1,10 @@
 :: Prepare the environment variables used by the application.
 
-:: The port where this project's web service is listening
-:: See https://github.com/Azure/azure-iot-pcs-team/wiki/Architecture-draft
-SETX PCS_STREAMANALYTICS_WEBSERVICE_PORT "9023"
-
 :: Connection string of the DocumentDb instance where telemetry is stored
 SETX PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING "..."
+
+:: URL of the device telemetry web service
+SETX PCS_DEVICETELEMETRY_WEBSERVICE_URL "..."
 
 :: Connection details of the Azure Blob where checkpoints are stored
 SETX PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT "..."

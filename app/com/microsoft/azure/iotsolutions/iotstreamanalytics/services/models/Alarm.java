@@ -4,10 +4,11 @@ package com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models;
 
 import org.joda.time.DateTime;
 
-public final class AlarmServiceModel {
+public final class Alarm {
     private final String id;
     private final DateTime dateCreated;
     private final DateTime dateModified;
+    private final long messageReceivedTime;
     private final String description;
     private final String deviceId;
     private final String status;
@@ -15,10 +16,11 @@ public final class AlarmServiceModel {
     private final String ruleSeverity;
     private final String ruleDescription;
 
-    public AlarmServiceModel(
+    public Alarm(
         final String id,
         final DateTime dateCreated,
         final DateTime dateModified,
+        final long messageReceivedTime,
         final String description,
         final String deviceId,
         final String status,
@@ -29,6 +31,7 @@ public final class AlarmServiceModel {
         this.id = id;
         this.dateCreated = dateCreated;
         this.dateModified = dateModified;
+        this.messageReceivedTime = messageReceivedTime;
         this.description = description;
         this.deviceId = deviceId;
         this.status = status;
@@ -47,6 +50,10 @@ public final class AlarmServiceModel {
 
     public DateTime getDateModified() {
         return this.dateModified;
+    }
+
+    public long getMessageReceivedTime() {
+        return this.messageReceivedTime;
     }
 
     public String getDescription() {

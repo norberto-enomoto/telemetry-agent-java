@@ -2,18 +2,17 @@
 
 package com.microsoft.azure.iotsolutions.iotstreamanalytics.services;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.microsoft.azure.documentdb.*;
-import com.microsoft.azure.iot.iothubreact.MessageFromDevice;
-import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.AlarmServiceModel;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.*;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.IServicesConfig;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.StorageConfig;
 import org.joda.time.DateTime;
 import play.Logger;
-import play.libs.Json;
+import play.libs.F;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.UUID;
 
 // TODO: decouple the class from DocumentDb:
 //  * use a generic storage interface, e.g. allow using Cassandra
@@ -29,28 +28,38 @@ public class Alarms implements IAlarms {
     private final String docDbCollection;
     private final int docDbRUs;
     private final RequestOptions docDbOptions;
-    private static Random rand = new Random();
-    private long lastAlarmCreated = 0;
+    private final IRules rules;
+    private final IRulesEvaluation rulesEvaluation;
 
-    private final String docSchemaKey = "doc.schema";
-    private final String docSchemaValue = "alarm";
+    private ArrayList<RuleApiModel> monitoringRules;
 
-    private final String docSchemaVersionKey = "doc.schemaVersion";
-    private final int docSchemaVersionValue = 1;
+    private final String DOC_SCHEMA_KEY = "doc.schema";
+    private final String DOC_SCHEMA_VALUE = "alarm";
 
-    private final String createdKey = "created";
-    private final String modifiedKey = "modified";
-    private final String descriptionKey = "description";
-    private final String statusKey = "status";
-    private final String deviceIdKey = "device.id";
+    private final String DOC_SCHEMA_VERSION_KEY = "doc.schemaVersion";
+    private final int DOC_SCHEMA_VERSION_VALUE = 1;
 
-    private final String ruleIdKey = "rule.id";
-    private final String ruleSeverityKey = "rule.severity";
-    private final String ruleDescriptionKey = "rule.description";
+    private final String CREATED_KEY = "created";
+    private final String MODIFIED_KEY = "modified";
+    private final String DESCRIPTION_KEY = "description";
+    private final String STATUS_KEY = "status";
+    private final String DEVICE_ID_KEY = "device.id";
+    private final String MESSAGE_RECEIVED_TIME = "device.msg.received";
+
+    private final String RULE_ID_KEY = "rule.id";
+    private final String RULE_SEVERITY_KEY = "rule.severity";
+    private final String RULE_DESCRIPTION_KEY = "rule.description";
+
+    private final String NEW_ALARM_STATUS = "open";
 
     @Inject
-    public Alarms(IServicesConfig config) throws DocumentClientException {
+    public Alarms(
+        IRules rules,
+        IRulesEvaluation rulesEvaluation,
+        IServicesConfig config) throws DocumentClientException {
 
+        this.rules = rules;
+        this.rulesEvaluation = rulesEvaluation;
         final StorageConfig storageConfig = config.getAlarmsStorageConfig();
 
         this.docDbConnection = new DocumentClient(
@@ -66,18 +75,63 @@ public class Alarms implements IAlarms {
 
         this.createDatabaseIfNotExists();
         this.createCollectionIfNotExists();
+
+        this.monitoringRules = new ArrayList<>();
+        this.loadAllRules();
     }
 
     @Override
-    public void process(MessageFromDevice m) {
-        AlarmServiceModel alarm = this.generateFakeAlarms(m);
-        if (alarm != null) {
-            log.info("Alarm! " + alarm.getDescription());
-            this.saveAlarm(alarm);
-        }
+    public void process(RawMessage message) {
+        this.monitoringRules.forEach(rule -> {
+            log.debug("Evaluating rule {} for device {}", rule.getDescription(), message.getDeviceId());
+            F.Tuple<Boolean, String> eval = this.rulesEvaluation.evaluate(rule, message);
+            if (eval._1) {
+                log.info("Alarm! " + eval._2);
+                this.createAlarm(rule, message, eval._2);
+            }
+        });
     }
 
-    private void saveAlarm(AlarmServiceModel alarm) {
+    private void createAlarm(
+        RuleApiModel rule,
+        RawMessage deviceMessage,
+        String alarmDescription) {
+
+        String alarmId = UUID.randomUUID().toString();
+        DateTime created = DateTime.now();
+
+        Alarm alarm = new Alarm(
+            alarmId,
+            created,
+            created,
+            deviceMessage.getReceivedTime(),
+            alarmDescription,
+            deviceMessage.getDeviceId(),
+            NEW_ALARM_STATUS,
+            rule.getId(),
+            rule.getSeverity(),
+            rule.getDescription());
+
+        this.saveAlarm(alarm);
+    }
+
+    private void loadAllRules() {
+        this.monitoringRules.clear();
+
+        this.rules.getAllAsync().handle(
+            (result, error) -> {
+                if (error != null) {
+                    log.error("Unable to load monitoring rules");
+                } else {
+                    this.monitoringRules = result;
+                    log.info("Monitoring rules loaded: {} rules", result.size());
+                }
+
+                return true;
+            });
+    }
+
+    private void saveAlarm(Alarm alarm) {
         Document doc = this.alarmToDocument(alarm);
 
         String collectionLink = String.format("/dbs/%s/colls/%s",
@@ -91,25 +145,27 @@ public class Alarms implements IAlarms {
         }
     }
 
-    private Document alarmToDocument(AlarmServiceModel alarm) {
+    private Document alarmToDocument(Alarm alarm) {
 
         Document document = new Document();
 
-        // TODO: make inserts idempotent
+        // TODO: make inserts idempotent, e.g. gen Id from msg details
         document.setId(UUID.randomUUID().toString());
-        document.set(docSchemaKey, docSchemaValue);
-        document.set(docSchemaVersionKey, docSchemaVersionValue);
-        document.set(createdKey, alarm.getDateCreated().getMillis());
-        document.set(modifiedKey, alarm.getDateModified().getMillis());
-        document.set(statusKey, alarm.getStatus());
-        document.set(descriptionKey, alarm.getDescription());
-        document.set(deviceIdKey, alarm.getDeviceId());
-        document.set(ruleIdKey, alarm.getRuleId());
-        document.set(ruleSeverityKey, alarm.getRuleSeverity());
-        document.set(ruleDescriptionKey, alarm.getRuleDescription());
+
+        document.set(DOC_SCHEMA_KEY, DOC_SCHEMA_VALUE);
+        document.set(DOC_SCHEMA_VERSION_KEY, DOC_SCHEMA_VERSION_VALUE);
+        document.set(CREATED_KEY, alarm.getDateCreated().getMillis());
+        document.set(MODIFIED_KEY, alarm.getDateModified().getMillis());
+        document.set(STATUS_KEY, alarm.getStatus());
+        document.set(DESCRIPTION_KEY, alarm.getDescription());
+        document.set(RULE_SEVERITY_KEY, alarm.getRuleSeverity());
+        document.set(RULE_DESCRIPTION_KEY, alarm.getRuleDescription());
 
         // The logic used to generate the alarm (future proofing for ML)
-        document.set("logic", "1Device-1Rule-1Message");
+        document.set("logic", "1Rule-1Device-1Message");
+        document.set(RULE_ID_KEY, alarm.getRuleId());
+        document.set(DEVICE_ID_KEY, alarm.getDeviceId());
+        document.set(MESSAGE_RECEIVED_TIME, alarm.getMessageReceivedTime());
 
         return document;
     }
@@ -194,8 +250,7 @@ public class Alarms implements IAlarms {
             }
 
             log.warn("Another process already created the collection", e);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error while creating DocumentDb collection", e);
             throw e;
         }
@@ -206,102 +261,5 @@ public class Alarms implements IAlarms {
         requestOptions.setOfferThroughput(this.docDbRUs);
         requestOptions.setConsistencyLevel(ConsistencyLevel.Eventual);
         return requestOptions;
-    }
-
-    // TODO: temporary code, remove it
-    private AlarmServiceModel generateFakeAlarms(MessageFromDevice m) {
-
-        final String open = "open";
-        final String acknowledged = "acknowledged";
-        final String closed = "closed";
-        final String critical = "critical";
-        final String warning = "warning";
-        final String info = "info";
-
-        // Don't create more than 1 alarm every 30 seconds
-        final int frequency = 30;
-
-        long now = DateTime.now().getMillis() / 1000;
-        if (this.lastAlarmCreated == 0) {
-            this.lastAlarmCreated = now;
-            return null;
-        }
-
-        if (now - this.lastAlarmCreated < frequency) return null;
-
-        // Try to deserialize the message
-        JsonNode data;
-        try {
-            data = Json.parse(m.contentAsString());
-            if (!data.isObject()) return null;
-        } catch (Throwable t) {
-            return null;
-        }
-
-        boolean headOrTails1 = rand.nextInt(2) == 1;
-        boolean headOrTails2 = rand.nextInt(2) == 1;
-        String severity = headOrTails1 ? critical : headOrTails2 ? warning : info;
-
-        if (data.hasNonNull("temperature") && headOrTails1) {
-            this.lastAlarmCreated = now;
-            return new AlarmServiceModel(
-                UUID.randomUUID().toString(),
-                DateTime.now(),
-                DateTime.now(),
-                "Temperature too high: " + data.get("temperature"),
-                m.deviceId(),
-                open,
-                "fakeRuleId-1234",
-                severity,
-                "A fake rule for temperature"
-            );
-        }
-
-        if (data.hasNonNull("humidity") && headOrTails1) {
-            this.lastAlarmCreated = now;
-            return new AlarmServiceModel(
-                UUID.randomUUID().toString(),
-                DateTime.now(),
-                DateTime.now(),
-                "Humidity too high: " + data.get("humidity"),
-                m.deviceId(),
-                open,
-                "fakeRuleId-1999",
-                severity,
-                "A fake rule about humidity"
-            );
-        }
-
-        if (data.hasNonNull("floor") && headOrTails1) {
-            this.lastAlarmCreated = now;
-            return new AlarmServiceModel(
-                UUID.randomUUID().toString(),
-                DateTime.now(),
-                DateTime.now(),
-                "Blocked at floor: " + data.get("floor"),
-                m.deviceId(),
-                open,
-                "fakeRuleId-007",
-                severity,
-                "A fake rule about building floors"
-            );
-        }
-
-        if (data.hasNonNull("speed") && headOrTails1) {
-            this.lastAlarmCreated = now;
-            return new AlarmServiceModel(
-                UUID.randomUUID().toString(),
-                DateTime.now(),
-                DateTime.now(),
-                "Excessive speed: " + data.get("speed"),
-                m.deviceId(),
-                open,
-                "fakeRuleId-66",
-                severity,
-                "A fake rule about speed"
-            );
-        }
-
-        return null;
     }
 }
