@@ -2,15 +2,30 @@
 
 package com.microsoft.azure.iotsolutions.iotstreamanalytics.services;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.exceptions.ExternalDependencyException;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.*;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.libs.F;
 
-import java.util.ArrayList;
+import java.util.*;
 
+// TODO: the class is loading rules too often
+// https://github.com/Azure/iot-stream-analytics-java/issues/36
+@Singleton
 public class RulesEvaluation implements IRulesEvaluation {
 
     private static final Logger.ALogger log = Logger.of(RulesEvaluation.class);
+
+    // For each group, reload the device IDs once every 5 minutes
+    private static int GROUPS_CACHE_TTL_SECONDS = 300;
+
+    // Groups cache: <Group ID, <list of devices, cache expiration>>
+    private final HashMap<String, F.Tuple<Set<String>, DateTime>> deviceGroupsCache;
+
+    private final IDeviceGroups deviceGroups;
 
     // Important! keep the values lowercase
     @SuppressWarnings("SpellCheckingInspection")
@@ -36,83 +51,124 @@ public class RulesEvaluation implements IRulesEvaluation {
     private static final String NEQ3_OPERATOR = "!=";
     private static final String NEQ4_OPERATOR = "<>";
 
-    private final String GT_MESSAGE = "`{}` value `{}` is greater than `{}`";
-    private final String GTE_MESSAGE = "`{}` value `{}` is greater than or equal to `{}`";
-    private final String LT_MESSAGE = "`{}` value `{}` is less than `{}`";
-    private final String LTE_MESSAGE = "`{}` value `{}` is less than or equal to `{}`";
-    private final String EQ_MESSAGE = "`{}` value `{}` is equal to `{}`";
-    private final String NEQ_MESSAGE = "`{}` value `{}` is not equal to `{}`";
+    private final String GT_MESSAGE = "`%s` value `%s` is greater than `%s`";
+    private final String GTE_MESSAGE = "`%s` value `%s` is greater than or equal to `%s`";
+    private final String LT_MESSAGE = "`%s` value `%s` is less than `%s`";
+    private final String LTE_MESSAGE = "`%s` value `%s` is less than or equal to `%s`";
+    private final String EQ_MESSAGE = "`%s` value `%s` is equal to `%s`";
+    private final String NEQ_MESSAGE = "`%s` value `%s` is not equal to `%s`";
 
-    public F.Tuple<Boolean, String> evaluate(RuleApiModel rule, RawMessage message) {
-
-        log.debug("Evaluating rule {} for device {}", rule.getDescription(), message.getDeviceId());
-
-        F.Tuple<Boolean, String> noMatch = new F.Tuple<>(false, "");
-        ArrayList<String> descriptions = new ArrayList<>();
-
-        for (ConditionApiModel c : rule.getConditions()) {
-            F.Tuple<Boolean, String> eval = this.evaluateCondition(c, message);
-            // break as soon as one condition doesn't match
-            if (!eval._1) return noMatch;
-            descriptions.add(eval._2);
-        }
-
-        return new F.Tuple<>(true, String.join("; ", descriptions));
+    @Inject
+    public RulesEvaluation(IDeviceGroups deviceGroups) {
+        this.deviceGroups = deviceGroups;
+        this.deviceGroupsCache = new HashMap<>();
     }
 
-    private F.Tuple<Boolean, String> evaluateCondition(
+    public RulesEvaluationResult evaluate(RuleApiModel rule, RawMessage message)
+        throws ExternalDependencyException {
+
+        RulesEvaluationResult result = new RulesEvaluationResult();
+
+        if (this.groupContainsDevice(message.getDeviceId(), rule.getGroupId())) {
+
+            log.debug("Evaluating rule {} for device {} with {} conditions",
+                rule.getDescription(), message.getDeviceId(), rule.getConditions().size());
+
+            ArrayList<String> descriptions = new ArrayList<>();
+            for (ConditionApiModel c : rule.getConditions()) {
+                ConditionEvaluationResult eval = this.evaluateCondition(c, message);
+                // perf: all conditions must match, break as soon as one doesn't
+                if (!eval.match) return result;
+                descriptions.add(eval.message);
+            }
+
+            result.match = true;
+            result.message = String.join("; ", descriptions);
+        } else {
+            log.debug("Skipping rule {} because device {} doesn't belong to group {}",
+                rule.getDescription(), message.getDeviceId(), rule.getGroupId());
+        }
+
+        return result;
+    }
+
+    private boolean groupContainsDevice(String deviceId, String groupId)
+        throws ExternalDependencyException {
+
+        synchronized (this.deviceGroupsCache) {
+            // Check if the cache is expired
+            if (this.deviceGroupsCache.containsKey(groupId)) {
+                if (this.deviceGroupsCache.get(groupId)._2.isBeforeNow()) {
+                    log.debug("Cache for group {} expired", groupId);
+                    this.deviceGroupsCache.remove(groupId);
+                }
+            }
+
+            // If the the group information is in not available, retrieve and cache
+            if (!this.deviceGroupsCache.containsKey(groupId)) {
+                log.debug("Preparing cache for group {}", groupId);
+
+                this.deviceGroupsCache.put(
+                    groupId,
+                    new F.Tuple<>(
+                        this.deviceGroups.getDevices(groupId),
+                        DateTime.now().plusSeconds(GROUPS_CACHE_TTL_SECONDS)
+                    ));
+            }
+        }
+
+        // Check if the group contains the device ID
+        return (this.deviceGroupsCache.get(groupId)._1.contains(deviceId));
+    }
+
+    private ConditionEvaluationResult evaluateCondition(
         ConditionApiModel condition,
         RawMessage message) {
 
-        F.Tuple<Boolean, String> result = new F.Tuple<>(false, "");
+        ConditionEvaluationResult r = new ConditionEvaluationResult();
 
         String field = condition.getField();
 
-        if (!message.has(field)) return result;
+        if (!message.hasPayloadField(field)) {
+            log.debug("Message payload doesn't contain field {}", field);
+            return r;
+        }
 
-        String type = message.typeOf(field);
-        String operator = condition.getOperator().toLowerCase();
+        if (message.payloadIsNumber(field)) {
 
-        if (type.equals(RawMessage.NUMBER)) {
-
-            double actualValue = message.getNumber(field);
+            double actualValue = message.getNumberFromPayload(field);
             double threshold = Double.parseDouble(condition.getValue());
+            String operator = condition.getOperator().toLowerCase();
+
+            log.debug("Field {}, Value {}, Operator {}, Threshold {}", field, actualValue, operator, threshold);
 
             switch (operator) {
                 case GT1_OPERATOR:
                 case GT2_OPERATOR:
                     if (actualValue > threshold) {
-                        result = new F.Tuple<>(
-                            true,
-                            String.format(GT_MESSAGE,
-                                field, actualValue, threshold));
+                        r.match = true;
+                        r.message = String.format(GT_MESSAGE, field, actualValue, threshold);
                     }
                     break;
                 case GTE1_OPERATOR:
                 case GTE2_OPERATOR:
                     if (actualValue >= threshold) {
-                        result = new F.Tuple<>(
-                            true,
-                            String.format(GTE_MESSAGE,
-                                field, actualValue, threshold));
+                        r.match = true;
+                        r.message = String.format(GTE_MESSAGE, field, actualValue, threshold);
                     }
                     break;
                 case LT1_OPERATOR:
                 case LT2_OPERATOR:
                     if (actualValue < threshold) {
-                        result = new F.Tuple<>(
-                            true,
-                            String.format(LT_MESSAGE,
-                                field, actualValue, threshold));
+                        r.match = true;
+                        r.message = String.format(LT_MESSAGE, field, actualValue, threshold);
                     }
                     break;
                 case LTE1_OPERATOR:
                 case LTE2_OPERATOR:
                     if (actualValue <= threshold) {
-                        result = new F.Tuple<>(
-                            true,
-                            String.format(LTE_MESSAGE,
-                                field, actualValue, threshold));
+                        r.match = true;
+                        r.message = String.format(LTE_MESSAGE, field, actualValue, threshold);
                     }
                     break;
                 case EQ1_OPERATOR:
@@ -120,10 +176,8 @@ public class RulesEvaluation implements IRulesEvaluation {
                 case EQ3_OPERATOR:
                 case EQ4_OPERATOR:
                     if (actualValue == threshold) {
-                        result = new F.Tuple<>(
-                            true,
-                            String.format(EQ_MESSAGE,
-                                field, actualValue, threshold));
+                        r.match = true;
+                        r.message = String.format(EQ_MESSAGE, field, actualValue, threshold);
                     }
                     break;
                 case NEQ1_OPERATOR:
@@ -131,53 +185,46 @@ public class RulesEvaluation implements IRulesEvaluation {
                 case NEQ3_OPERATOR:
                 case NEQ4_OPERATOR:
                     if (actualValue != threshold) {
-                        result = new F.Tuple<>(
-                            true,
-                            String.format(NEQ_MESSAGE,
-                                field, actualValue, threshold));
+                        r.match = true;
+                        r.message = String.format(NEQ_MESSAGE, field, actualValue, threshold);
                     }
                     break;
             }
-        } else if (type.equals(RawMessage.STRING)) {
+        } else if (message.payloadIsString(field)) {
 
-            String actualValue = message.getString(field);
+            String actualValue = message.getStringFromPayload(field);
             String threshold = condition.getValue();
+            String operator = condition.getOperator().toLowerCase();
+
+            log.debug("Field {}, Value '{}', Operator {}, Threshold '{}'", field, actualValue, operator, threshold);
 
             switch (operator) {
                 case GT1_OPERATOR:
                 case GT2_OPERATOR:
                     if (actualValue.compareToIgnoreCase(threshold) > 0) {
-                        result = new F.Tuple<>(
-                            true,
-                            String.format(GT_MESSAGE,
-                                field, actualValue, threshold));
+                        r.match = true;
+                        r.message = String.format(GT_MESSAGE, field, actualValue, threshold);
                     }
                     break;
                 case GTE1_OPERATOR:
                 case GTE2_OPERATOR:
                     if (actualValue.compareToIgnoreCase(threshold) >= 0) {
-                        result = new F.Tuple<>(
-                            true,
-                            String.format(GTE_MESSAGE,
-                                field, actualValue, threshold));
+                        r.match = true;
+                        r.message = String.format(GTE_MESSAGE, field, actualValue, threshold);
                     }
                     break;
                 case LT1_OPERATOR:
                 case LT2_OPERATOR:
                     if (actualValue.compareToIgnoreCase(threshold) < 0) {
-                        result = new F.Tuple<>(
-                            true,
-                            String.format(LT_MESSAGE,
-                                field, actualValue, threshold));
+                        r.match = true;
+                        r.message = String.format(LT_MESSAGE, field, actualValue, threshold);
                     }
                     break;
                 case LTE1_OPERATOR:
                 case LTE2_OPERATOR:
                     if (actualValue.compareToIgnoreCase(threshold) <= 0) {
-                        result = new F.Tuple<>(
-                            true,
-                            String.format(LTE_MESSAGE,
-                                field, actualValue, threshold));
+                        r.match = true;
+                        r.message = String.format(LTE_MESSAGE, field, actualValue, threshold);
                     }
                     break;
                 case EQ1_OPERATOR:
@@ -185,10 +232,8 @@ public class RulesEvaluation implements IRulesEvaluation {
                 case EQ3_OPERATOR:
                 case EQ4_OPERATOR:
                     if (actualValue.equalsIgnoreCase(threshold)) {
-                        result = new F.Tuple<>(
-                            true,
-                            String.format(EQ_MESSAGE,
-                                field, actualValue, threshold));
+                        r.match = true;
+                        r.message = String.format(EQ_MESSAGE, field, actualValue, threshold);
                     }
                     break;
                 case NEQ1_OPERATOR:
@@ -196,15 +241,20 @@ public class RulesEvaluation implements IRulesEvaluation {
                 case NEQ3_OPERATOR:
                 case NEQ4_OPERATOR:
                     if (!actualValue.equalsIgnoreCase(threshold)) {
-                        result = new F.Tuple<>(
-                            true,
-                            String.format(NEQ_MESSAGE,
-                                field, actualValue, threshold));
+                        r.match = true;
+                        r.message = String.format(NEQ_MESSAGE, field, actualValue, threshold);
                     }
                     break;
             }
+        } else {
+            log.error("Unknown type for `{}` value sent by device {}", field, message.getDeviceId());
         }
 
-        return result;
+        return r;
+    }
+
+    private class ConditionEvaluationResult {
+        public boolean match = false;
+        public String message = "";
     }
 }

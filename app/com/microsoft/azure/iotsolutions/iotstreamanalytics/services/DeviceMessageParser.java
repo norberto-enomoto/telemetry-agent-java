@@ -13,10 +13,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class DeviceMessageParser implements IDeviceMessageParser {
-    private static final Logger.ALogger log = Logger.of(DeviceMessageParser.class);
 
-    private final String userDataPrefix = "data.";
-    private final String userMetadataPrefix = "metadata.";
+    private static final Logger.ALogger log = Logger.of(DeviceMessageParser.class);
 
     @Override
     public RawMessage messageToRawMessage(MessageFromDevice m) {
@@ -34,7 +32,7 @@ public class DeviceMessageParser implements IDeviceMessageParser {
 
         // Save all the message properties from the message header
         m.properties().forEach(
-            (k, v) -> result.setString(userMetadataPrefix + k, v));
+            (k, v) -> result.setStringFromProperties(k, v));
 
         // Save all the message properties from the message payload
         if (contentType.toLowerCase().contains("json")
@@ -53,19 +51,19 @@ public class DeviceMessageParser implements IDeviceMessageParser {
                     Map.Entry<String, JsonNode> field = fields.next();
                     JsonNode value = field.getValue();
                     if (value.isNumber()) {
-                        result.setNumber(userDataPrefix + field.getKey(), field.getValue().asDouble());
+                        result.setNumberFromPayload(field.getKey(), field.getValue().asDouble());
                     } else if (value.isBoolean()) {
-                        result.setBoolean(userDataPrefix + field.getKey(), field.getValue().asBoolean());
+                        result.setBooleanFromPayload(field.getKey(), field.getValue().asBoolean());
                     } else {
-                        result.setString(userDataPrefix + field.getKey(), field.getValue().asText(""));
+                        result.setStringFromPayload(field.getKey(), field.getValue().asText(""));
                     }
                 }
             } else if (data.isNumber()) {
-                result.setNumber(userDataPrefix + "value", data.asDouble());
+                result.setNumberFromPayload("value", data.asDouble());
             } else if (data.isBoolean()) {
-                result.setBoolean(userDataPrefix + "value", data.asBoolean());
+                result.setBooleanFromPayload("value", data.asBoolean());
             } else if (data.isTextual()) {
-                result.setString(userDataPrefix + "value", data.asText());
+                result.setStringFromPayload("value", data.asText());
             }
         }
 

@@ -5,6 +5,7 @@ package com.microsoft.azure.iotsolutions.iotstreamanalytics.services;
 import com.google.inject.Inject;
 import com.microsoft.azure.documentdb.*;
 import com.microsoft.azure.iot.iothubreact.MessageFromDevice;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.exceptions.ExternalDependencyException;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.RawMessage;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.IServicesConfig;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.StorageConfig;
@@ -55,7 +56,8 @@ public class Messages implements IMessages {
     }
 
     @Override
-    public void process(MessageFromDevice m) {
+    public void process(MessageFromDevice m)
+        throws ExternalDependencyException {
 
         log.debug("Saving message...");
         RawMessage msg = this.saveMessage(m);
@@ -76,7 +78,12 @@ public class Messages implements IMessages {
         } catch (DocumentClientException e) {
             if (e.getStatusCode() != 409) {
                 log.error("Error while writing message", e);
-                // TODO: fix, message gets lost otherwise
+                // TODO: fix, otherwise message gets lost. When the service
+                // fails to write the message to storage, it should either retry
+                // or stop processing the following messages. The current behavior
+                // of logging the error and moving on, means that in case of
+                // error, the message has not been stored.
+                // see https://github.com/Azure/iot-stream-analytics-java/issues/35
             }
         }
 
@@ -171,8 +178,7 @@ public class Messages implements IMessages {
             }
 
             log.warn("Another process already created the collection", e);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error while creating DocumentDb collection", e);
             throw e;
         }

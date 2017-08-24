@@ -6,6 +6,12 @@ SETX PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING "..."
 :: URL of the device telemetry web service
 SETX PCS_DEVICETELEMETRY_WEBSERVICE_URL "..."
 
+:: URL of the UI config web service
+SETX PCS_UICONFIG_WEBSERVICE_URL "..."
+
+:: URL of the IoT Hub manager web service
+SETX PCS_IOTHUBMANAGER_WEBSERVICE_URL "..."
+
 :: Connection details of the Azure Blob where checkpoints are stored
 SETX PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT "..."
 SETX PCS_IOTHUBREACT_AZUREBLOB_KEY "..."

@@ -4,12 +4,12 @@ package com.microsoft.azure.iotsolutions.iotstreamanalytics.services;
 
 import com.google.inject.Inject;
 import com.microsoft.azure.documentdb.*;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.exceptions.ExternalDependencyException;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.*;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.IServicesConfig;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.StorageConfig;
 import org.joda.time.DateTime;
 import play.Logger;
-import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -50,6 +50,7 @@ public class Alarms implements IAlarms {
     private final String RULE_SEVERITY_KEY = "rule.severity";
     private final String RULE_DESCRIPTION_KEY = "rule.description";
 
+    // TODO: https://github.com/Azure/iot-stream-analytics-java/issues/34
     private final String NEW_ALARM_STATUS = "open";
 
     @Inject
@@ -81,15 +82,17 @@ public class Alarms implements IAlarms {
     }
 
     @Override
-    public void process(RawMessage message) {
-        this.monitoringRules.forEach(rule -> {
+    public void process(RawMessage message)
+        throws ExternalDependencyException {
+
+        for (RuleApiModel rule : this.monitoringRules) {
             log.debug("Evaluating rule {} for device {}", rule.getDescription(), message.getDeviceId());
-            F.Tuple<Boolean, String> eval = this.rulesEvaluation.evaluate(rule, message);
-            if (eval._1) {
-                log.info("Alarm! " + eval._2);
-                this.createAlarm(rule, message, eval._2);
+            IRulesEvaluation.RulesEvaluationResult result = this.rulesEvaluation.evaluate(rule, message);
+            if (result.match) {
+                log.info("Alarm! " + result.message);
+                this.createAlarm(rule, message, result.message);
             }
-        });
+        }
     }
 
     private void createAlarm(
@@ -118,17 +121,20 @@ public class Alarms implements IAlarms {
     private void loadAllRules() {
         this.monitoringRules.clear();
 
-        this.rules.getAllAsync().handle(
-            (result, error) -> {
-                if (error != null) {
-                    log.error("Unable to load monitoring rules");
-                } else {
-                    this.monitoringRules = result;
-                    log.info("Monitoring rules loaded: {} rules", result.size());
-                }
+        this.rules.getAllAsync()
+            .handle(
+                (result, error) -> {
+                    if (error != null) {
+                        log.error("Unable to load monitoring rules");
+                    } else {
+                        this.monitoringRules = result;
+                        log.info("Monitoring rules loaded: {} rules", result.size());
+                    }
 
-                return true;
-            });
+                    return true;
+                })
+            .toCompletableFuture()
+            .join();
     }
 
     private void saveAlarm(Alarm alarm) {

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 
-package com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.exceptions;
+package com.microsoft.azure.iotsolutions.iotstreamanalytics.services.exceptions;
 
 public class ConfigurationException extends Exception {
 

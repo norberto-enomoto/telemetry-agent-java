@@ -16,7 +16,8 @@ import play.api.libs.ws.WSConfigParser;
 import play.api.libs.ws.ahc.*;
 import play.libs.ws.WSClient;
 import play.libs.ws.ahc.AhcWSClient;
-import play.shaded.ahc.org.asynchttpclient.*;
+import play.shaded.ahc.org.asynchttpclient.DefaultAsyncHttpClient;
+import play.shaded.ahc.org.asynchttpclient.DefaultAsyncHttpClientConfig;
 
 public class Module extends AbstractModule {
 

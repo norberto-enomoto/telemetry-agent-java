@@ -10,6 +10,16 @@ if [[ -z "$PCS_DEVICETELEMETRY_WEBSERVICE_URL" ]]; then
     exit -1
 fi
 
+if [[ -z "$PCS_UICONFIG_WEBSERVICE_URL" ]]; then
+    echo "Error: the PCS_UICONFIG_WEBSERVICE_URL environment variable is not defined."
+    exit -1
+fi
+
+if [[ -z "$PCS_IOTHUBMANAGER_WEBSERVICE_URL" ]]; then
+    echo "Error: the PCS_IOTHUBMANAGER_WEBSERVICE_URL environment variable is not defined."
+    exit -1
+fi
+
 if [[ -z "$PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT" ]]; then
     echo "Error: the PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT environment variable is not defined."
     exit -1

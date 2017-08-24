@@ -3,10 +3,10 @@
 package com.microsoft.azure.iotsolutions.iotstreamanalytics.services;
 
 import com.google.inject.Inject;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.exceptions.ExternalDependencyException;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.RuleApiModel;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.RuleListApiModel;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.IServicesConfig;
-import com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.exceptions.ExternalDependencyException;
 import play.Logger;
 import play.libs.Json;
 import play.libs.ws.WSClient;
@@ -51,7 +51,8 @@ public class Rules implements IRules {
         try {
             this.wsClient.close();
         } catch (Exception e) {
-            // ignore
+            // ignore, no need to log, the client might have been closed
+            // or disposed already
         }
     }
 

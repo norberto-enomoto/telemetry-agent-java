@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 
-package com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.exceptions;
+package com.microsoft.azure.iotsolutions.iotstreamanalytics.services.exceptions;
 
 /**
  * Checked exception for request errors.

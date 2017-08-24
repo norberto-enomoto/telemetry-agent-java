@@ -11,6 +11,7 @@ import com.microsoft.azure.iot.iothubreact.MessageFromDevice;
 import com.microsoft.azure.iot.iothubreact.SourceOptions;
 import com.microsoft.azure.iot.iothubreact.javadsl.IoTHub;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.IMessages;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.exceptions.ExternalDependencyException;
 import org.joda.time.DateTime;
 import play.Logger;
 import scala.concurrent.duration.FiniteDuration;
@@ -71,6 +72,7 @@ public class Stream implements IStream {
 
     @Override
     public void Run() {
+
         log.info("Starting stream");
         this.source = this.hub.source(this.getStreamOptions());
         this.source
@@ -89,19 +91,28 @@ public class Stream implements IStream {
     }
 
     private SourceOptions getStreamOptions() {
+
         Instant startTimeIfNoCheckpoint = Instant.now().minus(this.StartFrom, ChronoUnit.HOURS);
         return new SourceOptions().fromCheckpoint(startTimeIfNoCheckpoint);
     }
 
     private Flow<MessageFromDevice, MessageFromDevice, NotUsed> processingFlow() {
+
         return Flow.of(MessageFromDevice.class).map(m -> {
-            this.messagesProcessor.process(m);
+            try {
+                this.messagesProcessor.process(m);
+            } catch (ExternalDependencyException e) {
+                log.error("Error while processing message offset {} for device {}: {}", m.offset(), m.deviceId(), e);
+                // TODO: stop the stream, require user input?
+            }
+
             this.throughputTotal++;
             return m;
         });
     }
 
     private Runnable logThroughput(Stream self) {
+
         return () -> {
             long currTime = DateTime.now().getMillis();
             if (self.throughputPreviousTime == 0) {

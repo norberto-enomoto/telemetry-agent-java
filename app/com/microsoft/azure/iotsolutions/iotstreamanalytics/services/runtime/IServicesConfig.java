@@ -9,6 +9,10 @@ public interface IServicesConfig {
 
     String getMonitoringRulesUrl();
 
+    String getDeviceGroupsUrl();
+
+    String getDevicesUrl();
+
     StorageConfig getAlarmsStorageConfig();
 
     StorageConfig getMessagesStorageConfig();

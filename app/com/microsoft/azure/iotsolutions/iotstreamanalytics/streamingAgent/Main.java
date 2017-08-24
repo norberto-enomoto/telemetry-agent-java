@@ -4,7 +4,7 @@ package com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.exceptions.ConfigurationException;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.exceptions.ConfigurationException;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.runtime.Uptime;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.streaming.Stream;
 import com.typesafe.config.Config;

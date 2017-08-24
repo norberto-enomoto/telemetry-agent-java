@@ -29,7 +29,7 @@ public final class RuleApiModel {
         return this.id;
     }
 
-    private void setId(String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -38,7 +38,7 @@ public final class RuleApiModel {
         return this.name;
     }
 
-    private void setName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -47,7 +47,7 @@ public final class RuleApiModel {
         return this.enabled;
     }
 
-    private void setEnabled(boolean enabled) {
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
@@ -56,7 +56,7 @@ public final class RuleApiModel {
         return this.description;
     }
 
-    private void setDescription(String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -65,7 +65,7 @@ public final class RuleApiModel {
         return this.groupId;
     }
 
-    private void setGroupId(String groupId) {
+    public void setGroupId(String groupId) {
         this.groupId = groupId;
     }
 
@@ -74,7 +74,7 @@ public final class RuleApiModel {
         return this.severity;
     }
 
-    private void setSeverity(String severity) {
+    public void setSeverity(String severity) {
         this.severity = severity;
     }
 
@@ -83,7 +83,7 @@ public final class RuleApiModel {
         return this.conditions;
     }
 
-    private void setConditions(ArrayList<ConditionApiModel> conditions) {
+    public void setConditions(ArrayList<ConditionApiModel> conditions) {
         this.conditions = conditions;
     }
 }

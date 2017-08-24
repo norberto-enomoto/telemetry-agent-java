@@ -10,6 +10,16 @@ IF "%PCS_DEVICETELEMETRY_WEBSERVICE_URL%" == "" (
     exit /B 1
 )
 
+IF "%PCS_UICONFIG_WEBSERVICE_URL%" == "" (
+    echo Error: the PCS_UICONFIG_WEBSERVICE_URL environment variable is not defined.
+    exit /B 1
+)
+
+IF "%PCS_IOTHUBMANAGER_WEBSERVICE_URL%" == "" (
+    echo Error: the PCS_IOTHUBMANAGER_WEBSERVICE_URL environment variable is not defined.
+    exit /B 1
+)
+
 IF "%PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT%" == "" (
     echo Error: the PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT environment variable is not defined.
     exit /B 1
