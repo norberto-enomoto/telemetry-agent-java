@@ -95,6 +95,11 @@ public class Alarms implements IAlarms {
         }
     }
 
+    @Override
+    public void reloadRules() {
+        this.loadAllRules();
+    }
+
     private void createAlarm(
         RuleApiModel rule,
         RawMessage deviceMessage,
@@ -119,6 +124,8 @@ public class Alarms implements IAlarms {
     }
 
     private void loadAllRules() {
+
+        log.debug("Loading rules...");
         this.monitoringRules.clear();
 
         this.rules.getAllAsync()

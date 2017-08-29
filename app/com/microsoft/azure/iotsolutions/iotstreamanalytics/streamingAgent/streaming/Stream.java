@@ -25,6 +25,16 @@ public class Stream implements IStream {
     private static final Logger.ALogger log = Logger.of(Stream.class);
 
     /**
+     * Every 60 seconds, reload the processing logic (e.g. reload rules)
+     */
+    private static final int REFRESH_LOGIC_FREQUENCY = 60;
+
+    /**
+     * Every 30 seconds log the throughput
+     */
+    private static final int LOG_THROUGHPUT_FREQUENCY = 30;
+
+    /**
      * Streaming options: use the checkpoint if available,
      * otherwise start streaming from 24 hours in the past
      */
@@ -80,12 +90,19 @@ public class Stream implements IStream {
             .to(this.hub.checkpointSink())
             .run(this.streamMaterializer);
 
+        // Every 60 seconds, reload the processing logic (e.g. reload rules)
+        this.system.scheduler().schedule(
+            new FiniteDuration(REFRESH_LOGIC_FREQUENCY, TimeUnit.SECONDS),
+            new FiniteDuration(REFRESH_LOGIC_FREQUENCY, TimeUnit.SECONDS),
+            () -> this.messagesProcessor.refreshLogic(),
+            this.system.dispatcher());
+
+        // Every 30 seconds log the throughput
         if (log.isInfoEnabled()) {
-            // Every 30 seconds log the throughput
             this.system.scheduler().schedule(
-                new FiniteDuration(1, TimeUnit.SECONDS),
-                new FiniteDuration(30, TimeUnit.SECONDS),
-                logThroughput(this),
+                new FiniteDuration(LOG_THROUGHPUT_FREQUENCY, TimeUnit.SECONDS),
+                new FiniteDuration(LOG_THROUGHPUT_FREQUENCY, TimeUnit.SECONDS),
+                () -> logThroughput(this),
                 this.system.dispatcher());
         }
     }
@@ -111,25 +128,23 @@ public class Stream implements IStream {
         });
     }
 
-    private Runnable logThroughput(Stream self) {
+    private void logThroughput(Stream self) {
 
-        return () -> {
-            long currTime = DateTime.now().getMillis();
-            if (self.throughputPreviousTime == 0) {
-                self.throughputPreviousTime = currTime;
-                self.throughputPreviousTotal = self.throughputTotal;
-                return;
-            }
-
-            double countDelta = self.throughputTotal - self.throughputPreviousTotal;
-            double timeDelta = currTime - self.throughputPreviousTime;
-            double throughput = (countDelta / timeDelta) * 1000;
-
-            log.info("Throughput: {} msgs/sec - {} messages in the last {} seconds ",
-                (int) throughput, (int) countDelta, (int) (timeDelta / 1000));
-
-            self.throughputPreviousTotal = self.throughputTotal;
+        long currTime = DateTime.now().getMillis();
+        if (self.throughputPreviousTime == 0) {
             self.throughputPreviousTime = currTime;
-        };
+            self.throughputPreviousTotal = self.throughputTotal;
+            return;
+        }
+
+        double countDelta = self.throughputTotal - self.throughputPreviousTotal;
+        double timeDelta = currTime - self.throughputPreviousTime;
+        double throughput = (countDelta / timeDelta) * 1000;
+
+        log.info("Throughput: {} msgs/sec - {} messages in the last {} seconds ",
+            (int) throughput, (int) countDelta, (int) (timeDelta / 1000));
+
+        self.throughputPreviousTotal = self.throughputTotal;
+        self.throughputPreviousTime = currTime;
     }
 }

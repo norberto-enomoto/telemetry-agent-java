@@ -66,6 +66,12 @@ public class Messages implements IMessages {
         this.alarms.process(msg);
     }
 
+    @Override
+    public void refreshLogic()
+    {
+        this.alarms.reloadRules();
+    }
+
     private RawMessage saveMessage(MessageFromDevice m) {
 
         RawMessage message = this.messageParser.messageToRawMessage(m);

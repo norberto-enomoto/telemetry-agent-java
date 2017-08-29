@@ -9,4 +9,5 @@ import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.exceptions.E
 @ImplementedBy(Messages.class)
 public interface IMessages {
     void process(MessageFromDevice m) throws ExternalDependencyException;
+    void refreshLogic();
 }

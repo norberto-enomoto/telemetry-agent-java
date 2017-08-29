@@ -9,4 +9,5 @@ import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.RawMe
 @ImplementedBy(Alarms.class)
 public interface IAlarms {
     void process(RawMessage message) throws ExternalDependencyException;
+    void reloadRules();
 }
