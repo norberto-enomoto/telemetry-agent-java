@@ -9,6 +9,7 @@ import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.*;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.IServicesConfig;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.StorageConfig;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import play.Logger;
 
 import java.util.ArrayList;
@@ -106,7 +107,7 @@ public class Alarms implements IAlarms {
         String alarmDescription) {
 
         String alarmId = UUID.randomUUID().toString();
-        DateTime created = DateTime.now();
+        DateTime created = DateTime.now(DateTimeZone.UTC);
 
         Alarm alarm = new Alarm(
             alarmId,
