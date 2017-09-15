@@ -32,7 +32,7 @@ How to use the microservice
 1. Install Docker Compose: https://docs.docker.com/compose/install
 1. Create an instance of an [Azure IoT Hub](https://azure.microsoft.com/services/iot-hub)
 1. Store the "IoT Hub" connection string  in the [env-vars-setup](scripts)
-   script.  The service internally uses 
+   script.  The service internally uses
    [IoT Hub React](https://github.com/Azure/toketi-iothubreact) so you will notice some
    variables with an "IOTHUBREACT" prefix. For more information about
    environment variables, see the
@@ -45,8 +45,8 @@ How to use the microservice
    cd docker
    docker-compose up
    ```
-The Docker compose configuration requires the [dependencies](README.md#dependencies) resolved and 
-environment variables set as described previously. You should now start seeing the stream 
+The Docker compose configuration requires the [dependencies](README.md#dependencies) resolved and
+environment variables set as described previously. You should now start seeing the stream
 content in the console.
 
 ## Java setup
@@ -67,7 +67,7 @@ content in the console.
 1. Either in IntelliJ Run Configuration or in your system, define the following
    environment variables:
     1. `PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING` = {your CosmosDb DocumentDb connection string}
-    1. `PCS_DEVICETELEMETRY_WEBSERVICE_URL` = {the Device Telemetry service 
+    1. `PCS_DEVICETELEMETRY_WEBSERVICE_URL` = {the Device Telemetry service
     endpoint}
     1. `PCS_UICONFIG_WEBSERVICE_URL` = {the UI Config service endpoint}
     1. `PCS_IOTHUBMANAGER_WEBSERVICE_URL` = {the IoT HubManager service endpoint}
@@ -115,7 +115,7 @@ This microservice contains the following projects:
 * **Tests**
     * **WebService** - Unit tests for web services functionality
     * **Services** - Unit tests for services functionality
-* **Scripts** - contains build scripts, docker container creation scripts, 
+* **Scripts** - contains build scripts, docker container creation scripts,
 and scripts for running the microservice from the command line
 * **Routes** - defines the URL mapping to web service classes
 
