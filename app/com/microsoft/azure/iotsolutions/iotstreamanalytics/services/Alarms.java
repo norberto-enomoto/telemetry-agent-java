@@ -5,7 +5,9 @@ package com.microsoft.azure.iotsolutions.iotstreamanalytics.services;
 import com.google.inject.Inject;
 import com.microsoft.azure.documentdb.*;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.exceptions.ExternalDependencyException;
-import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.*;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.Alarm;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.RawMessage;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.models.RuleApiModel;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.IServicesConfig;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.StorageConfig;
 import org.joda.time.DateTime;
@@ -14,6 +16,7 @@ import play.Logger;
 
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.CompletionException;
 
 // TODO: decouple the class from DocumentDb:
 //  * use a generic storage interface, e.g. allow using Cassandra
@@ -58,17 +61,19 @@ public class Alarms implements IAlarms {
     public Alarms(
         IRules rules,
         IRulesEvaluation rulesEvaluation,
-        IServicesConfig config) throws DocumentClientException {
+        IServicesConfig config,
+        IStorageClient storageClient) throws DocumentClientException {
 
         this.rules = rules;
         this.rulesEvaluation = rulesEvaluation;
         final StorageConfig storageConfig = config.getAlarmsStorageConfig();
 
-        this.docDbConnection = new DocumentClient(
-            storageConfig.getDocumentDbUri(),
-            storageConfig.getDocumentDbKey(),
-            ConnectionPolicy.GetDefault(),
-            ConsistencyLevel.Eventual);
+        try {
+            this.docDbConnection = storageClient.getDocumentClient();
+        } catch (Exception e) {
+            log.error("Could not connect to DocumentClient");
+            throw new CompletionException(e);
+        }
 
         this.docDbDatabase = storageConfig.getDocumentDbDatabase();
         this.docDbCollection = storageConfig.getDocumentDbCollection();

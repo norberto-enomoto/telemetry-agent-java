@@ -5,19 +5,22 @@ package com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.strea
 import akka.NotUsed;
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
-import akka.stream.javadsl.*;
+import akka.stream.javadsl.Flow;
+import akka.stream.javadsl.Source;
 import com.google.inject.Inject;
 import com.microsoft.azure.iot.iothubreact.MessageFromDevice;
 import com.microsoft.azure.iot.iothubreact.SourceOptions;
 import com.microsoft.azure.iot.iothubreact.javadsl.IoTHub;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.IMessages;
 import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.exceptions.ExternalDependencyException;
+import com.microsoft.azure.iotsolutions.iotstreamanalytics.streamingAgent.runtime.IConfig;
 import org.joda.time.DateTime;
 import play.Logger;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class Stream implements IStream {
@@ -51,6 +54,11 @@ public class Stream implements IStream {
     private final ActorSystem system;
 
     /**
+     * IoT Hub partitions
+     */
+    private final int partitionsCount;
+
+    /**
      * The logic used to process each message
      */
     private IMessages messagesProcessor;
@@ -64,6 +72,7 @@ public class Stream implements IStream {
      * Akka stream source
      */
     private Source<MessageFromDevice, NotUsed> source;
+    private ArrayList<Source<MessageFromDevice, NotUsed>> sources;
 
     public long throughputPreviousTime = 0;
     public long throughputPreviousTotal = 0;
@@ -73,22 +82,30 @@ public class Stream implements IStream {
     public Stream(
         ActorSystem system,
         Materializer streamMaterializer,
+        IConfig config,
         IMessages messagesProcessor) {
         this.system = system;
         this.streamMaterializer = streamMaterializer;
         this.messagesProcessor = messagesProcessor;
         this.hub = new IoTHub();
+        this.partitionsCount = config.getStreamPartitionsCount();
+        this.sources = new ArrayList<>();
     }
 
     @Override
     public void Run() {
 
         log.info("Starting stream");
-        this.source = this.hub.source(this.getStreamOptions());
-        this.source
-            .via(processingFlow())
-            .to(this.hub.checkpointSink())
-            .run(this.streamMaterializer);
+
+        for (int p = 0; p < this.partitionsCount; p++) {
+            Source<MessageFromDevice, NotUsed> source = this.hub.source(this.getStreamOptions(p));
+            this.sources.add(source);
+
+            source
+                .via(processingFlow())
+                .to(this.hub.checkpointSink())
+                .run(this.streamMaterializer);
+        }
 
         // Every 60 seconds, reload the processing logic (e.g. reload rules)
         this.system.scheduler().schedule(
@@ -107,10 +124,12 @@ public class Stream implements IStream {
         }
     }
 
-    private SourceOptions getStreamOptions() {
+    private SourceOptions getStreamOptions(int partition) {
 
         Instant startTimeIfNoCheckpoint = Instant.now().minus(this.StartFrom, ChronoUnit.HOURS);
-        return new SourceOptions().fromCheckpoint(startTimeIfNoCheckpoint);
+        return new SourceOptions()
+            .partitions(new int[]{partition})
+            .fromCheckpoint(startTimeIfNoCheckpoint);
     }
 
     private Flow<MessageFromDevice, MessageFromDevice, NotUsed> processingFlow() {

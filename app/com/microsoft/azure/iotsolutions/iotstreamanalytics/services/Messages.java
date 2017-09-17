@@ -12,6 +12,7 @@ import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.Stor
 import play.Logger;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletionException;
 
 // TODO: decouple the class from DocumentDb:
 //  * use a generic storage interface, e.g. allow using Cassandra
@@ -24,6 +25,7 @@ public class Messages implements IMessages {
 
     private final IDeviceMessageParser messageParser;
     private final IAlarms alarms;
+
     private final DocumentClient docDbConnection;
     private final String docDbDatabase;
     private final String docDbCollection;
@@ -33,6 +35,7 @@ public class Messages implements IMessages {
     @Inject
     public Messages(
         IServicesConfig config,
+        IStorageClient storageClient,
         IDeviceMessageParser messageParser,
         IAlarms alarms) throws DocumentClientException {
 
@@ -40,11 +43,13 @@ public class Messages implements IMessages {
 
         this.messageParser = messageParser;
         this.alarms = alarms;
-        this.docDbConnection = new DocumentClient(
-            storageConfig.getDocumentDbUri(),
-            storageConfig.getDocumentDbKey(),
-            ConnectionPolicy.GetDefault(),
-            ConsistencyLevel.Eventual);
+
+        try {
+            this.docDbConnection = storageClient.getDocumentClient();
+        } catch (Exception e) {
+            log.error("Could not connect to DocumentClient");
+            throw new CompletionException(e);
+        }
 
         this.docDbDatabase = storageConfig.getDocumentDbDatabase();
         this.docDbCollection = storageConfig.getDocumentDbCollection();
@@ -67,8 +72,7 @@ public class Messages implements IMessages {
     }
 
     @Override
-    public void refreshLogic()
-    {
+    public void refreshLogic() {
         this.alarms.reloadRules();
     }
 
@@ -193,6 +197,7 @@ public class Messages implements IMessages {
     private RequestOptions getDocDbOptions() {
         RequestOptions requestOptions = new RequestOptions();
         requestOptions.setOfferThroughput(this.docDbRUs);
+        // For telemetry patterns, the Eventual consistency is ok
         requestOptions.setConsistencyLevel(ConsistencyLevel.Eventual);
         return requestOptions;
     }

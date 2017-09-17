@@ -2,9 +2,10 @@
 * text=auto eol=lf
 
 # Bash scripts
-sbt text eol=lf
 *.sh text eol=lf
 *.bash text eol=lf
+
+sbt text eol=lf
 scripts/build text eol=lf
 scripts/clean-up text eol=lf
 scripts/compile text eol=lf

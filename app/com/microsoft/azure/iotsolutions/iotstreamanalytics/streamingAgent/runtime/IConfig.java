@@ -9,6 +9,11 @@ import com.microsoft.azure.iotsolutions.iotstreamanalytics.services.runtime.ISer
 public interface IConfig {
 
     /**
+     * Number of partitions that can be streamed independently
+     */
+    int getStreamPartitionsCount();
+
+    /**
      * Service layer configuration
      */
     IServicesConfig getServicesConfig();
