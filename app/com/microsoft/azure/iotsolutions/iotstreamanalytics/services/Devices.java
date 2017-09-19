@@ -134,7 +134,7 @@ public class Devices implements IDevices {
         return wsClient.url(url)
             .addHeader("Accept", "application/json")
             .addHeader("Cache-Control", "no-cache")
-            .addHeader("User-Agent", "IoT Stream Analytics " + this.getClass().getTypeName())
+            .addHeader("User-Agent", "Telemetry Agent " + this.getClass().getTypeName())
             .setRequestTimeout(Duration.of(10, ChronoUnit.SECONDS));
     }
 }

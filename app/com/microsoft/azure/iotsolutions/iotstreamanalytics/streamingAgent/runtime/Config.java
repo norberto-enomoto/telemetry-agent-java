@@ -11,7 +11,7 @@ public class Config implements IConfig {
     private final String Namespace = "com.microsoft.azure.iotsolutions.";
 
     // Settings about this application
-    private final String ApplicationKey = Namespace + "iot-stream-analytics.";
+    private final String ApplicationKey = Namespace + "telemetry-agent.";
 
     private final String monitoringRulesUrlKey = ApplicationKey + "monitoringRulesUrl";
     private final String deviceGroupsUrlKey = ApplicationKey + "deviceGroupsUrl";

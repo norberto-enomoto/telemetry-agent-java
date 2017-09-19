@@ -17,7 +17,7 @@ IF %ERRORLEVEL% NEQ 0 GOTO FAIL
 
 xcopy /EFIKORVXY %APP_HOME%\scripts\docker\content\* target\docker\stage\app\
 cd target\docker\stage
-docker build -t azureiotpcs/iot-stream-analytics-java:latest .
+docker build -t azureiotpcs/telemetry-agent-java:latest .
 
 :: - - - - - - - - - - - - - -
 goto :END

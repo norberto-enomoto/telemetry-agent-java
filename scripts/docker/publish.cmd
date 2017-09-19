@@ -10,7 +10,7 @@ docker version > NUL 2>&1
 IF %ERRORLEVEL% NEQ 0 GOTO MISSING_DOCKER
 
 :: Publish the container image do Docker Hub
-docker push azureiotpcs/iot-stream-analytics-java
+docker push azureiotpcs/telemetry-agent-java
 IF %ERRORLEVEL% NEQ 0 GOTO FAIL
 
 :: - - - - - - - - - - - - - -

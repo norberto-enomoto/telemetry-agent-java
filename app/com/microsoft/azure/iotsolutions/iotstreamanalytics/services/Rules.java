@@ -102,7 +102,7 @@ public class Rules implements IRules {
         return wsClient.url(this.rulesUrl + path)
             .addHeader("Accept", "application/json")
             .addHeader("Cache-Control", "no-cache")
-            .addHeader("User-Agent", "IoT Stream Analytics " + this.getClass().getTypeName())
+            .addHeader("User-Agent", "Telemetry Agent " + this.getClass().getTypeName())
             .setRequestTimeout(Duration.of(10, ChronoUnit.SECONDS));
     }
 }

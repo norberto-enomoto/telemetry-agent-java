@@ -21,7 +21,7 @@ import java.util.concurrent.CompletionException;
 // TODO: decouple the class from DocumentDb:
 //  * use a generic storage interface, e.g. allow using Cassandra
 //  * wrap exception in generic storage exceptions
-// https://github.com/Azure/iot-stream-analytics-java/issues/20
+// https://github.com/Azure/telemetry-agent-java/issues/20
 // TODO: resilience to errors and throttling
 public class Alarms implements IAlarms {
 
@@ -54,7 +54,7 @@ public class Alarms implements IAlarms {
     private final String RULE_SEVERITY_KEY = "rule.severity";
     private final String RULE_DESCRIPTION_KEY = "rule.description";
 
-    // TODO: https://github.com/Azure/iot-stream-analytics-java/issues/34
+    // TODO: https://github.com/Azure/telemetry-agent-java/issues/34
     private final String NEW_ALARM_STATUS = "open";
 
     @Inject

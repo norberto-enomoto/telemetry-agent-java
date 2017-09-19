@@ -34,11 +34,11 @@ sbt_build_docker_image() {
     cd target/docker/stage
 
     if [[ $BUILD_LATEST == "no" ]]; then
-        docker build . -t azureiotpcs/iot-stream-analytics-java:$APP_VERSION
+        docker build . -t azureiotpcs/telemetry-agent-java:$APP_VERSION
     else
-        docker build -t azureiotpcs/iot-stream-analytics-java:latest .
-        IMGID=$(docker images|grep 'azureiotpcs/iot-stream-analytics-java'|grep latest|tr -s ' '|cut -d' ' -f 3)
-        docker tag $IMGID azureiotpcs/iot-stream-analytics-java:$APP_VERSION
+        docker build -t azureiotpcs/telemetry-agent-java:latest .
+        IMGID=$(docker images|grep 'azureiotpcs/telemetry-agent-java'|grep latest|tr -s ' '|cut -d' ' -f 3)
+        docker tag $IMGID azureiotpcs/telemetry-agent-java:$APP_VERSION
     fi
 }
 

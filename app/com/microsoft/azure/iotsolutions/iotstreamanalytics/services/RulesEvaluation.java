@@ -13,7 +13,7 @@ import play.libs.F;
 import java.util.*;
 
 // TODO: the class is loading rules too often
-// https://github.com/Azure/iot-stream-analytics-java/issues/36
+// https://github.com/Azure/telemetry-agent-java/issues/36
 @Singleton
 public class RulesEvaluation implements IRulesEvaluation {
 

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 
-name := "iot-stream-analytics"
+name := "telemetry-agent"
 organization := "com.microsoft.azure.iotsolutions"
 
 scalaVersion := "2.12.2"
@@ -40,7 +40,7 @@ lazy val commonSettings = Seq(
   },
 
   // Publishing options, see http://www.scala-sbt.org/0.13/docs/Artifacts.html
-  licenses += ("MIT", url("https://github.com/Azure/iot-stream-analytics-java/blob/master/LICENSE")),
+  licenses += ("MIT", url("https://github.com/Azure/telemetry-agent-java/blob/master/LICENSE")),
   publishMavenStyle := true,
   publishArtifact in Test := true,
   publishArtifact in(Compile, packageDoc) := true,
@@ -61,7 +61,7 @@ lazy val commonSettings = Seq(
 )
 
 // Main module
-lazy val iotstreamanalytics = project.in(file("."))
+lazy val telemetryagent = project.in(file("."))
   .enablePlugins(PlayJava)
   .configs(IntegrationTest)
   .settings(commonSettings)
@@ -77,6 +77,6 @@ dockerAlias := DockerAlias(dockerRepository.value, None, packageName.value + "-j
 maintainer in Docker := "Devis Lucato (https://github.com/dluc)"
 dockerBaseImage := "toketi/openjdk-8-jre-alpine-bash"
 dockerUpdateLatest := true
-dockerBuildOptions ++= Seq("--squash", "--compress", "--label", "Tags=Azure,IoT,PCS,Java")
+dockerBuildOptions ++= Seq("--squash", "--compress", "--label", "Tags=Azure,IoT,PCS,Telemetry,Java")
 defaultLinuxInstallLocation in Docker := "/app"
 dockerEntrypoint := Seq("./run.sh")

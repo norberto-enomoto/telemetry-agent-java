@@ -17,7 +17,7 @@ import java.util.concurrent.CompletionException;
 // TODO: decouple the class from DocumentDb:
 //  * use a generic storage interface, e.g. allow using Cassandra
 //  * wrap exception in generic storage exceptions
-// https://github.com/Azure/iot-stream-analytics-java/issues/20
+// https://github.com/Azure/telemetry-agent-java/issues/20
 // TODO: resilience to errors and throttling
 public class Messages implements IMessages {
 
@@ -93,7 +93,7 @@ public class Messages implements IMessages {
                 // or stop processing the following messages. The current behavior
                 // of logging the error and moving on, means that in case of
                 // error, the message has not been stored.
-                // see https://github.com/Azure/iot-stream-analytics-java/issues/35
+                // see https://github.com/Azure/telemetry-agent-java/issues/35
             }
         }
 

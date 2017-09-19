@@ -2,25 +2,25 @@
 [![Issues][issues-badge]][issues-url]
 [![Gitter][gitter-badge]][gitter-url]
 
-Azure IoT Stream Analytics Overview
-===================================
+Telemetry Agent Overview
+========================
 
 This service analyzes the telemetry stream, stores messages from Azure IoT Hub
 to DocumentDb, and generates alerts according to defined rules.
 The IoT stream is analyzed using a set of rules defined in the
-[Device Telemetry service](https://github.com/Azure/device-telemetry-java),
+[Telemetry service](https://github.com/Azure/device-telemetry-java),
 and generating "alarms" when a message matches some of these rules. The alarms
 are also stored in DocumentDb.
 
 We provide also a
-[.NET version](https://github.com/Azure/iot-stream-analytics-dotnet)
+[.NET version](https://github.com/Azure/telemetry-agent-dotnet)
 of this project.
 
 Dependencies
 ============
 * [Azure Cosmos DB account](https://ms.portal.azure.com/#create/Microsoft.DocumentDB) use the one created for [Storage Adapter microservice](https://github.com/Azure/pcs-storage-adapter-java)
-* [Device Telemetry](https://github.com/Azure/device-telemetry-java)
-* [UI Config](https://github.com/Azure/pcs-ui-config-java)
+* [Telemetry](https://github.com/Azure/device-telemetry-java)
+* [Config](https://github.com/Azure/pcs-config-java)
 * [IoT Hub Manager](https://github.com/Azure/iothub-manager-java)
 * [Azure IoT Hub](https://azure.microsoft.com/services/iot-hub) use the one created for [IoT Hub Manager](https://github.com/Azure/iothub-manager-java)
 
@@ -38,7 +38,7 @@ How to use the microservice
    environment variables, see the
    [Running the service with IntelliJ IDEA](README.md#running-the-service-with-intellij-idea).
 1. Open a terminal console into the project folder, and run these commands to start
-   the [IoT Stream Analytics](https://github.com/Azure/iot-stream-analytics-java) service
+   the [Telemetry Agent](https://github.com/Azure/telemetry-agent-java) service
    ```
    cd scripts
    env-vars-setup      // (Bash users: ./env-vars-setup).  This script creates your env. variables
@@ -66,10 +66,9 @@ content in the console.
 1. Create a new Run Configuration, of type "SBT Task" and enter "run 9023" (including the double quotes). This ensures that the service will start using the TCP port 9023
 1. Either in IntelliJ Run Configuration or in your system, define the following
    environment variables:
-    1. `PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING` = {your CosmosDb DocumentDb connection string}
-    1. `PCS_DEVICETELEMETRY_WEBSERVICE_URL` = {the Device Telemetry service
-    endpoint}
-    1. `PCS_UICONFIG_WEBSERVICE_URL` = {the UI Config service endpoint}
+    1. `PCS_TELEMETRYAGENT_DOCUMENTDB_CONNSTRING` = {your CosmosDb DocumentDb connection string}
+    1. `PCS_TELEMETRY_WEBSERVICE_URL` = {the Telemetry service endpoint}
+    1. `PCS_CONFIG_WEBSERVICE_URL` = {the Config service endpoint}
     1. `PCS_IOTHUBMANAGER_WEBSERVICE_URL` = {the IoT HubManager service endpoint}
     1. `PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT` = {your Azure Blob Storage account name}
     1. `PCS_IOTHUBREACT_AZUREBLOB_KEY` = {your Azure Blob Storage account key}
@@ -108,7 +107,7 @@ Steps using Eclipse Oxygen ("Eclipse for Java Developers" package):
 
 ## Project Structure
 This microservice contains the following projects:
-* **Code** for the application is in ```app/com.microsoft.azure.iotsolutions.iotstreamanalytics/```
+* **Code** for the application is in ```app/com.microsoft.azure.iotsolutions.telemetryagent/```
     * **WebService** - Java web service exposing REST interface for status checkpoint to verify that the dependencies are resolved
     * **Services** - Java project containing business logic for interacting with Azure services (IoTHub, DocDb etc.) and device telemetry microservice
     * **StreamingAgent** - Java project that reads messages from IoT Hub, processes them using rules that generate alarms and store alarms and messages in the storage
@@ -153,14 +152,14 @@ dockerAlias := DockerAlias(dockerRepository.value, None, packageName.value + "-j
 dockerBaseImage := "toketi/openjdk-8-jre-alpine-bash"
 dockerUpdateLatest := false
 dockerBuildOptions ++= Seq("--squash", "--compress", "--label", "Tags=Azure,IoT,PCS,Java")
-dockerEntrypoint := Seq("bin/iot-stream-analytics")
+dockerEntrypoint := Seq("bin/telemetry-agent")
 ```
 
 The package logic is executed via
 [sbt-native-packager](https://github.com/sbt/sbt-native-packager), installed
 in [plugins.sbt](project/plugins.sbt).
 
-You can also start Device telemetry service and its dependencies in one simple step,
+You can also start Telemetry service and its dependencies in one simple step,
 using Docker Compose with the
 [docker-compose.yml](scripts/docker/docker-compose.yml) file in the project:
 
@@ -210,11 +209,11 @@ Troubleshooting
 
 Feedback
 ========
-Please enter issues, bugs, or suggestions as GitHub Issues [here](https://github.com/Azure/iot-stream-analytics-java/issues)
+Please enter issues, bugs, or suggestions as GitHub Issues [here](https://github.com/Azure/telemetry-agent-java/issues)
 
-[build-badge]: https://img.shields.io/travis/Azure/iot-stream-analytics-java.svg
-[build-url]: https://travis-ci.org/Azure/iot-stream-analytics-java
-[issues-badge]: https://img.shields.io/github/issues/azure/iot-stream-analytics-java.svg
-[issues-url]: https://github.com/azure/iot-stream-analytics-java/issues
+[build-badge]: https://img.shields.io/travis/Azure/telemetry-agent-java.svg
+[build-url]: https://travis-ci.org/Azure/telemetry-agent-java
+[issues-badge]: https://img.shields.io/github/issues/azure/telemetry-agent-java.svg
+[issues-url]: https://github.com/azure/telemetry-agent-java/issues
 [gitter-badge]: https://img.shields.io/gitter/room/azure/iot-pcs.js.svg
 [gitter-url]: https://gitter.im/azure/iot-pcs

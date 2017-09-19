@@ -20,8 +20,8 @@ services:
       # See https://ms.portal.azure.com/#create/Microsoft.DocumentDB
       - PCS_STORAGEADAPTER_DOCUMENTDB_CONNSTRING
 
-  uiconfig:
-    image: azureiotpcs/pcs-ui-config-dotnet:latest
+  config:
+    image: azureiotpcs/pcs-config-dotnet:latest
     depends_on:
       - storageadapter
     ports:
@@ -39,7 +39,7 @@ services:
       - PCS_IOTHUB_CONNSTRING
 
   telemetry:
-    image: azureiotpcs/device-telemetry-java:latest
+    image: azureiotpcs/telemetry-java:latest
     depends_on:
       - storageadapter
     ports:
@@ -47,13 +47,13 @@ services:
     environment:
       # Add the Document Db connection string here
       # See https://ms.portal.azure.com/#create/Microsoft.DocumentDB
-      - PCS_DEVICETELEMETRY_DOCUMENTDB_CONNSTRING
+      - PCS_TELEMETRY_DOCUMENTDB_CONNSTRING
       - PCS_STORAGEADAPTER_WEBSERVICE_URL=http://storageadapter:9022/v1
 
-#  streamanalytics:
-#    image: azureiotpcs/iot-stream-analytics-java
+#  telemetryagent:
+#    image: azureiotpcs/telemetry-agent-java
 #    depends_on:
-#      - uiconfig
+#      - config
 #      - iothubmanager
 #      - telemetry
 #    ports:
@@ -61,9 +61,9 @@ services:
 #    environment:
 #      # Add the Document Db connection string here
 #      # See https://ms.portal.azure.com/#create/Microsoft.DocumentDB
-#      - PCS_STREAMANALYTICS_DOCUMENTDB_CONNSTRING
-#      - PCS_DEVICETELEMETRY_WEBSERVICE_URL=http://telemetry:9004/v1
-#      - PCS_UICONFIG_WEBSERVICE_URL=http://uiconfig:9005/v1
+#      - PCS_TELEMETRYAGENT_DOCUMENTDB_CONNSTRING
+#      - PCS_TELEMETRY_WEBSERVICE_URL=http://telemetry:9004/v1
+#      - PCS_CONFIG_WEBSERVICE_URL=http://config:9005/v1
 #      - PCS_IOTHUBMANAGER_WEBSERVICE_URL=http://iothubmanager:9002/v1
 #      # Add Azure IoT Hub connection details here
 #      # See https://azure.microsoft.com/services/iot-hub

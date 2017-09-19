@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 
 /**
- * Model used by the UI config service when returning Rules
- * see: https://github.com/Azure/pcs-ui-config-java/wiki
+ * Model used by the config service when returning Rules
+ * see: https://github.com/Azure/pcs-config-java/wiki
  */
 public class DeviceGroupApiModel {
 

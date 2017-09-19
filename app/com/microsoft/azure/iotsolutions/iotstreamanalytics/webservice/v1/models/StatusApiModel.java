@@ -14,7 +14,7 @@ import org.joda.time.format.DateTimeFormatter;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-@JsonPropertyOrder({"Status", "CurrentTime", "StartTime", "UpTime", "Properties", "Dependencies", "$metadata"})
+@JsonPropertyOrder({"Name", "Status", "CurrentTime", "StartTime", "UpTime", "Properties", "Dependencies", "$metadata"})
 public final class StatusApiModel {
 
     private String status;
@@ -29,7 +29,7 @@ public final class StatusApiModel {
 
     @JsonProperty("Name")
     public String getName() {
-        return "IoTStreamAnalytics";
+        return "TelemetryAgent";
     }
 
     @JsonProperty("Status")

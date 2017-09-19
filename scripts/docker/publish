@@ -7,6 +7,6 @@ source "$APP_HOME/scripts/.functions.sh"
 check_dependency_docker
 
 # Publish the container image do Docker Hub
-docker push azureiotpcs/iot-stream-analytics-java
+docker push azureiotpcs/telemetry-agent-java
 
 set +e
