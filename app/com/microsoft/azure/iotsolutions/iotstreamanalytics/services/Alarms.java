@@ -156,11 +156,18 @@ public class Alarms implements IAlarms {
         String collectionLink = String.format("/dbs/%s/colls/%s",
             this.docDbDatabase, this.docDbCollection);
         try {
-            this.docDbConnection.createDocument(collectionLink, doc, this.docDbOptions, true);
+            this.docDbConnection.createDocument(
+                collectionLink,
+                doc,
+                this.docDbOptions,
+                true)
+            .getResource();
         } catch (DocumentClientException e) {
             if (e.getStatusCode() != 409) {
                 log.error("Error while writing alarm", e);
             }
+        } catch (Exception e) {
+            log.error("Error while writing alarm", e);
         }
     }
 

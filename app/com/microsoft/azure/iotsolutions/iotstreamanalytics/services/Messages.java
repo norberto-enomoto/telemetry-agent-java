@@ -84,7 +84,14 @@ public class Messages implements IMessages {
         String collectionLink = String.format("/dbs/%s/colls/%s",
             this.docDbDatabase, this.docDbCollection);
         try {
-            this.docDbConnection.createDocument(collectionLink, doc, this.docDbOptions, true);
+            // create document then request resource to close http stream
+            this.docDbConnection.createDocument(
+                collectionLink,
+                doc,
+                this.docDbOptions,
+                true)
+                .getResource();
+
         } catch (DocumentClientException e) {
             if (e.getStatusCode() != 409) {
                 log.error("Error while writing message", e);
@@ -95,6 +102,9 @@ public class Messages implements IMessages {
                 // error, the message has not been stored.
                 // see https://github.com/Azure/telemetry-agent-java/issues/35
             }
+        } catch (Exception e) {
+            log.error("Error while writing message", e);
+            // TODO: fix, otherwise message gets lost.
         }
 
         return message;
