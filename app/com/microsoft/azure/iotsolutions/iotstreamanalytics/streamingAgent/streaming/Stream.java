@@ -138,8 +138,20 @@ public class Stream implements IStream {
             try {
                 this.messagesProcessor.process(m);
             } catch (ExternalDependencyException e) {
-                log.error("Error while processing message offset {} for device {}: {}", m.offset(), m.deviceId(), e);
+                log.error(
+                    "Error while processing message offset {} for device {}: {}",
+                    m.offset(),
+                    m.deviceId(),
+                    e);
                 // TODO: stop the stream, require user input?
+            } catch (Exception e) {
+                log.error(
+                    "Error while processing message offset {} for device {}: {}",
+                    m.offset(),
+                    m.deviceId(),
+                    e);
+                // TODO: fix ConcurrentModificationException
+                //       caused by Alarms.java:94 & Messages.java:71
             }
 
             this.throughputTotal++;
