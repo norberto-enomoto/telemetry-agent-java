@@ -156,6 +156,7 @@ public class Alarms implements IAlarms {
         String collectionLink = String.format("/dbs/%s/colls/%s",
             this.docDbDatabase, this.docDbCollection);
         try {
+            // create document then request resource to close http stream
             this.docDbConnection.createDocument(
                 collectionLink,
                 doc,
