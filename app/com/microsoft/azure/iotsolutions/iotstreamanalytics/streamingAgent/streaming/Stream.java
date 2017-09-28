@@ -151,7 +151,7 @@ public class Stream implements IStream {
                     m.deviceId(),
                     e);
                 // TODO: fix ConcurrentModificationException
-                //       caused by Alarms.java:94 & Messages.java:71
+                //       https://github.com/Azure/telemetry-agent-java/issues/55
             }
 
             this.throughputTotal++;
