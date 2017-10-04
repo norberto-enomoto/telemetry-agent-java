@@ -12,7 +12,7 @@ _dev/
 *_.sh
 .cache/**
 .travis
-
+*.ipr
 
 ### Java
 
