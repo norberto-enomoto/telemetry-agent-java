@@ -25,7 +25,7 @@ libraryDependencies ++= {
 resolvers += Resolver.bintrayRepo("microsoftazuretoketi", "toketi-repo")
 
 lazy val commonSettings = Seq(
-  version := "0.2.8",
+  version := "testing",
 
   organizationName := "Microsoft Azure",
   organizationHomepage := Some(new URL("https://www.microsoft.com/internet-of-things/azure-iot-suite")),
@@ -76,7 +76,7 @@ dockerRepository := Some("azureiotpcs")
 dockerAlias := DockerAlias(dockerRepository.value, None, packageName.value + "-java", Some((version in Docker).value))
 maintainer in Docker := "Devis Lucato (https://github.com/dluc)"
 dockerBaseImage := "toketi/openjdk-8-jre-alpine-bash"
-dockerUpdateLatest := true
-dockerBuildOptions ++= Seq("--squash", "--compress", "--label", "Tags=Azure,IoT,PCS,Telemetry,Java")
+dockerUpdateLatest := false
+dockerBuildOptions ++= Seq("--squash", "--compress", "--label", "Tags=Azure,IoT,Solutions,Telemetry,Analytics,Java")
 defaultLinuxInstallLocation in Docker := "/app"
 dockerEntrypoint := Seq("./run.sh")
