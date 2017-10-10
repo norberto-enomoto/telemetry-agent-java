@@ -175,10 +175,6 @@ public class Alarms implements IAlarms {
                 this.docDbOptions,
                 true)
                 .getResource();
-        } catch (DocumentClientException e) {
-            if (e.getStatusCode() != 409) {
-                log.error("Error while writing alarm", e);
-            }
         } catch (Exception e) {
             log.error("Error while writing alarm", e);
         }
