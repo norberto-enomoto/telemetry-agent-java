@@ -176,7 +176,7 @@ public class Alarms implements IAlarms {
                 true)
                 .getResource();
         } catch (Exception e) {
-            log.error("Error while writing alarm", e);
+            log.error("Error while writing alarm: " + doc.toJson(), e);
         }
     }
 

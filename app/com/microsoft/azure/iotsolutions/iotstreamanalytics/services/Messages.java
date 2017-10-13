@@ -118,6 +118,7 @@ public class Messages implements IMessages {
         } catch (Exception e) {
             log.error("Error while writing message", e);
             // TODO: fix, otherwise message gets lost.
+            // see https://github.com/Azure/telemetry-agent-java/issues/35
         }
 
         return message;
