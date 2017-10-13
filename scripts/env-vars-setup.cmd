@@ -12,6 +12,7 @@ SETX PCS_CONFIG_WEBSERVICE_URL "..."
 :: URL of the IoT Hub manager web service
 SETX PCS_IOTHUBMANAGER_WEBSERVICE_URL "..."
 
+:: see: Storage Account ⇒ Access Keys
 :: Connection details of the Azure Blob where checkpoints are stored
 SETX PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT "..."
 SETX PCS_IOTHUBREACT_AZUREBLOB_KEY "..."

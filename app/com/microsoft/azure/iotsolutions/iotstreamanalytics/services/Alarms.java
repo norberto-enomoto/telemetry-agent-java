@@ -156,11 +156,27 @@ public class Alarms implements IAlarms {
         String collectionLink = String.format("/dbs/%s/colls/%s",
             this.docDbDatabase, this.docDbCollection);
         try {
-            this.docDbConnection.createDocument(collectionLink, doc, this.docDbOptions, true);
-        } catch (DocumentClientException e) {
-            if (e.getStatusCode() != 409) {
-                log.error("Error while writing alarm", e);
-            }
+
+            /**
+             * create document then request resource to close http stream
+             *
+             * The ResourceResponse implements AutoCloseable so the close()
+             * method has been deprecated. However, the service floods the http
+             * stream with requests before they can auto-close, so we can
+             * call an API that will close the request, one API that calls close
+             * is getResource.
+             *
+             * See getResource() method in the DocumentClient project
+             * at https://github.com/Azure/azure-documentdb-java/
+             */
+            this.docDbConnection.createDocument(
+                collectionLink,
+                doc,
+                this.docDbOptions,
+                true)
+                .getResource();
+        } catch (Exception e) {
+            log.error("Error while writing alarm: " + doc.toJson(), e);
         }
     }
 

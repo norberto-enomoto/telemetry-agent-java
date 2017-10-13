@@ -84,8 +84,28 @@ public class Messages implements IMessages {
         String collectionLink = String.format("/dbs/%s/colls/%s",
             this.docDbDatabase, this.docDbCollection);
         try {
-            this.docDbConnection.createDocument(collectionLink, doc, this.docDbOptions, true);
+            /**
+             * create document then request resource to close http stream
+             *
+             * The ResourceResponse implements AutoCloseable so the close()
+             * method has been deprecated. However, the service floods the http
+             * stream with requests before they can auto-close, so we can
+             * call an API that will close the request, one API that calls close
+             * is getResource.
+             *
+             * See getResource() method in the DocumentClient project
+             * at https://github.com/Azure/azure-documentdb-java/
+             */
+            this.docDbConnection.createDocument(
+                collectionLink,
+                doc,
+                this.docDbOptions,
+                true)
+                .getResource();
+
         } catch (DocumentClientException e) {
+            // if the status is 409, it means the message has already been written
+            // to storage, so we can ignore the conflict error. Log all other errors.
             if (e.getStatusCode() != 409) {
                 log.error("Error while writing message", e);
                 // TODO: fix, otherwise message gets lost. When the service
@@ -95,6 +115,10 @@ public class Messages implements IMessages {
                 // error, the message has not been stored.
                 // see https://github.com/Azure/telemetry-agent-java/issues/35
             }
+        } catch (Exception e) {
+            log.error("Error while writing message", e);
+            // TODO: fix, otherwise message gets lost.
+            // see https://github.com/Azure/telemetry-agent-java/issues/35
         }
 
         return message;
