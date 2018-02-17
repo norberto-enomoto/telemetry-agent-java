@@ -77,6 +77,6 @@ dockerAlias := DockerAlias(dockerRepository.value, None, packageName.value + "-j
 maintainer in Docker := "Devis Lucato (https://github.com/dluc)"
 dockerBaseImage := "toketi/openjdk-8-jre-alpine-bash"
 dockerUpdateLatest := false
-dockerBuildOptions ++= Seq("--squash", "--compress", "--label", "Tags=Azure,IoT,Solutions,Telemetry,Analytics,Java")
+dockerBuildOptions ++= Seq("--compress", "--label", "Tags=Azure,IoT,Solutions,Telemetry,Analytics,Java")
 defaultLinuxInstallLocation in Docker := "/app"
 dockerEntrypoint := Seq("./run.sh")
