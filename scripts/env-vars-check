@@ -1,6 +1,29 @@
 #!/usr/bin/env bash
+# Copyright (c) Microsoft. All rights reserved.
 
-if [[ -z "$PCS_TELEMETRYAGENT_DOCUMENTDB_CONNSTRING" ]]; then
+# Before checking all the env vars, detect whether secrets, usually encrypted, are available or not.
+# Secrets are not available when building a pull request, so the script will not check for those.
+detect_secrets() {
+    SECRETS_AVAILABLE="true"
+    if [[ "$TRAVIS_PULL_REQUEST" != "" && "$TRAVIS_PULL_REQUEST" != "false" ]]; then
+        SECRETS_AVAILABLE="false"
+        echo "Warning: secrets and encrypted variables are not available when testing pull requests."
+    fi
+}
+
+detect_secrets
+
+# if [[ -z "$SOMETHING_SECRET" && "$SECRETS_AVAILABLE" = "true" ]]; then
+#     echo "Error: the SOMETHING_SECRET environment variable is not defined."
+#     exit -1
+# fi
+
+# if [[ -z "$SOMETHING_NOT_SECRET" ]]; then
+#     echo "Error: the SOMETHING_NOT_SECRET environment variable is not defined."
+#     exit -1
+# fi
+
+if [[ -z "$PCS_TELEMETRYAGENT_DOCUMENTDB_CONNSTRING" && "$SECRETS_AVAILABLE" = "true" ]]; then
     echo "Error: the PCS_TELEMETRYAGENT_DOCUMENTDB_CONNSTRING environment variable is not defined."
     exit -1
 fi
@@ -25,7 +48,7 @@ if [[ -z "$PCS_IOTHUBREACT_AZUREBLOB_ACCOUNT" ]]; then
     exit -1
 fi
 
-if [[ -z "$PCS_IOTHUBREACT_AZUREBLOB_KEY" ]]; then
+if [[ -z "$PCS_IOTHUBREACT_AZUREBLOB_KEY" && "$SECRETS_AVAILABLE" = "true" ]]; then
     echo "Error: the PCS_IOTHUBREACT_AZUREBLOB_KEY environment variable is not defined."
     exit -1
 fi
@@ -45,7 +68,7 @@ if [[ -z "$PCS_IOTHUBREACT_HUB_PARTITIONS" ]]; then
     exit -1
 fi
 
-if [[ -z "$PCS_IOTHUBREACT_ACCESS_CONNSTRING" ]]; then
+if [[ -z "$PCS_IOTHUBREACT_ACCESS_CONNSTRING" && "$SECRETS_AVAILABLE" = "true" ]]; then
     echo "Error: the PCS_IOTHUBREACT_ACCESS_CONNSTRING environment variable is not defined."
     exit -1
 fi
